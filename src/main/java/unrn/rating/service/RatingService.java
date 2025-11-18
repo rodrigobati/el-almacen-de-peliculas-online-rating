@@ -3,7 +3,7 @@ package unrn.rating.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import unrn.rating.model.Rating;
-import unrn.rating.persistence.RatingRepository;
+import unrn.rating.repository.RatingRepository;
 import unrn.rating.messaging.Event;
 import unrn.rating.messaging.EventType;
 import unrn.rating.messaging.MessagePublisher;

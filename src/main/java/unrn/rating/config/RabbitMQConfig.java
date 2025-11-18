@@ -1,4 +1,4 @@
-package main.java.unrn.rating.config;
+package unrn.rating.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

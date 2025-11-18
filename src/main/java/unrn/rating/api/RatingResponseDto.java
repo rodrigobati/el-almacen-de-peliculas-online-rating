@@ -1,4 +1,4 @@
-package main.java.unrn.rating.api;
+package unrn.rating.api;
 
 import java.time.LocalDateTime;
 

@@ -11,64 +11,81 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long peliculaId;
 
+    @Column(nullable = false)
     private String usuarioId;
 
-    private int valor;
+    @Embedded
+    private Puntaje puntaje;
 
     @Column(columnDefinition = "TEXT")
     private String comentario;
 
+    @Column(nullable = false)
     private LocalDateTime fechaCreacion;
 
-    static final String ERROR_VALOR_FUERA_DE_RANGO = "El puntaje debe estar entre 1 y 10";
-    static final String ERROR_PELICULA_OBLIGATORIA = "El id de la pelicula es obligatorio";
-    static final String ERROR_USUARIO_OBLIGATORIO = "El id del usuario es obligatorio";
-    static final String ERROR_COMENTARIO_VACIO = "El comentario no puede estar vacío si se proporciona";
+    private static final String ERROR_PELICULA_OBLIGATORIA = "El id de la película es obligatorio";
+    private static final String ERROR_USUARIO_OBLIGATORIO = "El id del usuario es obligatorio";
+    private static final String ERROR_COMENTARIO_VACIO = "El comentario no puede estar vacío si se proporciona";
 
-    // Constructor usado por JPA
     protected Rating() {
+        // sólo JPA
     }
 
-    public Rating(Long peliculaId, String usuarioId, int valor, String comentario) {
+    private Rating(Long peliculaId,
+            String usuarioId,
+            Puntaje puntaje,
+            String comentario,
+            LocalDateTime fechaCreacion) {
+
+        if (peliculaId == null) {
+            throw new IllegalArgumentException(ERROR_PELICULA_OBLIGATORIA);
+        }
+        if (usuarioId == null || usuarioId.isBlank()) {
+            throw new IllegalArgumentException(ERROR_USUARIO_OBLIGATORIO);
+        }
+
         this.peliculaId = peliculaId;
         this.usuarioId = usuarioId;
-        this.valor = valor;
-        this.comentario = comentario == null ? null : comentario.trim();
-        this.fechaCreacion = LocalDateTime.now();
-
-        assertPeliculaIdPresente();
-        assertUsuarioIdPresente();
-        assertValorEnRango();
-        assertComentarioSiSeInformaNoVacio();
+        this.puntaje = puntaje;
+        this.comentario = normalizarComentario(comentario);
+        this.fechaCreacion = fechaCreacion;
     }
 
-    private void assertValorEnRango() {
-        if (valor < 1 || valor > 10) {
-            throw new RuntimeException(ERROR_VALOR_FUERA_DE_RANGO);
+    // Fábrica estática: forma “oficial” de crear un rating
+    public static Rating crear(Long peliculaId,
+            String usuarioId,
+            int valor,
+            String comentario) {
+
+        Puntaje puntaje = Puntaje.de(valor);
+        LocalDateTime ahora = LocalDateTime.now();
+        return new Rating(peliculaId, usuarioId, puntaje, comentario, ahora);
+    }
+
+    // --- Comportamiento de dominio ---
+
+    public void cambiarPuntaje(int nuevoValor) {
+        this.puntaje = Puntaje.de(nuevoValor);
+    }
+
+    public void cambiarComentario(String nuevoComentario) {
+        this.comentario = normalizarComentario(nuevoComentario);
+    }
+
+    private String normalizarComentario(String comentario) {
+        if (comentario == null) {
+            return null;
         }
-    }
-
-    private void assertPeliculaIdPresente() {
-        if (peliculaId == null) {
-            throw new RuntimeException(ERROR_PELICULA_OBLIGATORIA);
+        String trimmed = comentario.trim();
+        if (trimmed.isEmpty()) {
+            throw new IllegalArgumentException(ERROR_COMENTARIO_VACIO);
         }
+        return trimmed;
     }
 
-    private void assertUsuarioIdPresente() {
-        if (usuarioId == null || usuarioId.isBlank()) {
-            throw new RuntimeException(ERROR_USUARIO_OBLIGATORIO);
-        }
-    }
-
-    private void assertComentarioSiSeInformaNoVacio() {
-        if (comentario != null && comentario.isBlank()) {
-            throw new RuntimeException(ERROR_COMENTARIO_VACIO);
-        }
-    }
-
-    // Accessors with intent (not plain setters/getters)
     public Long id() {
         return id;
     }
@@ -82,7 +99,7 @@ public class Rating {
     }
 
     public int valor() {
-        return valor;
+        return puntaje.value();
     }
 
     public String comentario() {
