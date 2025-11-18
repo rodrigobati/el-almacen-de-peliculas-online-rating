@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: rating-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: almacen_peliculas_rating
+      MYSQL_USER: rating_user
+      MYSQL_PASSWORD: rating_pass
+    ports:
+      - "3307:3306" # host:container (podés cambiar el 3307 si está ocupado)
+    volumes:
+      - rating-mysql-data:/var/lib/mysql
+    networks:
+      - rating-net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rating-rabbitmq
+    ports:
+      - "5672:5672" # AMQP
+      - "15672:15672" # consola web
+    networks:
+      - rating-net
+
+  rating:
+    build: .
+    container_name: rating-service
+    depends_on:
+      - mysql
+      - rabbitmq
+    environment:
+      # Si quisieras sobreescribir algo extra, lo podés hacer acá,
+      # pero en principio el perfil docker ya tiene todo configurado.
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8082:8080" # host:container
+    networks:
+      - rating-net
+
+networks:
+  rating-net:
+
+volumes:
+  rating-mysql-data:

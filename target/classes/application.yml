@@ -1,0 +1,22 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:mysql://mysql:3306/almacen_peliculas
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+  rabbitmq:
+    host: rabbit
+    port: 5672
+    username: videoclub
+    password: videoclub
+
+rating:
+  rabbitmq:
+    exchange: rating.exchange
+    queue: rating.queue
+    routing-key: rating.#
