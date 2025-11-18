@@ -26,6 +26,8 @@ ARG JAR_FILE=target/rating-0.0.1-SNAPSHOT.jar
 
 # Copiamos el jar desde la imagen de build
 COPY --from=build /app/${JAR_FILE} app.jar
+COPY scripts/wait-for.sh ./wait-for.sh
+RUN chmod +x ./wait-for.sh
 
 # Puerto interno de la app (ya está escuchando en 8082 según tu log)
 EXPOSE 8080
@@ -33,4 +35,4 @@ EXPOSE 8080
 # Activamos el perfil "docker" de Spring
 ENV SPRING_PROFILES_ACTIVE=docker
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+CMD ["./wait-for.sh", "mysql:3306", "--", "java", "-jar", "app.jar"]
