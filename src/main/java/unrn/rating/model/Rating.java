@@ -26,11 +26,11 @@ public class Rating {
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;
 
-    private static final String ERROR_PELICULA_OBLIGATORIA = "El id de la película es obligatorio";
-    private static final String ERROR_USUARIO_OBLIGATORIO = "El id del usuario es obligatorio";
-    private static final String ERROR_COMENTARIO_VACIO = "El comentario no puede estar vacío si se proporciona";
+    static final String ERROR_PELICULA_OBLIGATORIA = "El id de la película es obligatorio";
+    static final String ERROR_USUARIO_OBLIGATORIO = "El id del usuario es obligatorio";
+    static final String ERROR_COMENTARIO_VACIO = "El comentario no puede estar vacío si se proporciona";
 
-    protected Rating() {
+    public Rating(Long peliculaId2, String usuarioId2, int valor, String comentario2) {
         // sólo JPA
     }
 
@@ -41,10 +41,10 @@ public class Rating {
             LocalDateTime fechaCreacion) {
 
         if (peliculaId == null) {
-            throw new IllegalArgumentException(ERROR_PELICULA_OBLIGATORIA);
+            throw new RuntimeException(ERROR_PELICULA_OBLIGATORIA);
         }
         if (usuarioId == null || usuarioId.isBlank()) {
-            throw new IllegalArgumentException(ERROR_USUARIO_OBLIGATORIO);
+            throw new RuntimeException(ERROR_USUARIO_OBLIGATORIO);
         }
 
         this.peliculaId = peliculaId;
@@ -81,7 +81,7 @@ public class Rating {
         }
         String trimmed = comentario.trim();
         if (trimmed.isEmpty()) {
-            throw new IllegalArgumentException(ERROR_COMENTARIO_VACIO);
+            throw new RuntimeException(ERROR_COMENTARIO_VACIO);
         }
         return trimmed;
     }
