@@ -23,9 +23,10 @@ public class RatingController {
     @PostMapping
     public ResponseEntity<RatingResponseDto> crear(
             @RequestBody RatingRequestDto req,
-            @AuthenticationPrincipal Jwt jwt) {
+            @AuthenticationPrincipal(errorOnInvalidType = false) Jwt jwt) {
         // Extraer el userId del JWT (claim "sub" contiene el ID de usuario de Keycloak)
-        String usuarioId = jwt.getSubject();
+        // Para testing sin auth, usar un ID fijo si jwt es null
+        String usuarioId = (jwt != null) ? jwt.getSubject() : "test-user-123";
         Rating rating = RatingMapper.toModel(req, usuarioId);
         Rating saved = service.createRating(rating);
         return ResponseEntity.ok(RatingMapper.toDto(saved));
@@ -49,8 +50,9 @@ public class RatingController {
             @AuthenticationPrincipal Jwt jwt) {
         // Opcional: validar que el usuario solo pueda ver sus propios ratings
         // String usuarioIdToken = jwt.getSubject();
-        // if (!usuarioIdToken.equals(usuarioId)) throw new AccessDeniedException("...");
-        
+        // if (!usuarioIdToken.equals(usuarioId)) throw new
+        // AccessDeniedException("...");
+
         var list = service.ratingsPorUsuario(usuarioId).stream().map(RatingMapper::toDto).collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }

@@ -67,10 +67,20 @@ public class Event<K, T> {
         return data.getClass().getSimpleName() + "." + type;
     }
 
-    // Método adicional para compatibilidad con Jackson
-    @JsonIgnore
-    public String getRoutingkey() {
-        return routingKey();
+    // Getters para Jackson
+    public EventType getType() {
+        return type();
     }
 
+    public K getKey() {
+        return key();
+    }
+
+    public T getData() {
+        return data();
+    }
+
+    public String getRoutingKey() {
+        return routingKey();
+    }
 }

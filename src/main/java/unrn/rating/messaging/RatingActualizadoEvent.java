@@ -33,6 +33,19 @@ public class RatingActualizadoEvent {
         return totalRatings;
     }
 
+    // Getters para Jackson (convención JavaBean)
+    public Long getId() {
+        return id;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public long getTotalRatings() {
+        return totalRatings;
+    }
+
     // Setters para deserialización JSON
     public void setId(Long id) {
         this.id = id;
