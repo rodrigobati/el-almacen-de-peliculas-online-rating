@@ -10,9 +10,9 @@ public class MessagePublisher {
     private final RabbitTemplate rabbitTemplate;
     private final TopicExchange exchange;
 
-    public MessagePublisher(RabbitTemplate rabbitTemplate, TopicExchange exchange) {
+    public MessagePublisher(RabbitTemplate rabbitTemplate, TopicExchange peliculasExchange) {
         this.rabbitTemplate = rabbitTemplate;
-        this.exchange = exchange;
+        this.exchange = peliculasExchange;
     }
 
     public <K, T> void publish(Event<K, T> event) {

@@ -40,10 +40,10 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
-        <!-- Seguridad (por ahora todo permitAll, pero listo para crecer) -->
+        <!-- Seguridad con OAuth2 Resource Server para validar JWT de Keycloak -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
         <!-- Validaciones con jakarta.validation -->

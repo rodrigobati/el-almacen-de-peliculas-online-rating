@@ -1,5 +1,7 @@
 package unrn.rating.messaging;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Event<K, T> {
     private EventType type;
     private K key;
@@ -9,6 +11,17 @@ public class Event<K, T> {
     static final String ERROR_TIPO_OBLIGATORIO = "El tipo del evento es obligatorio.";
     static final String ERROR_ROUTINGKEY_OBLIGATORIO = "La clave de enrutamiento es obligatoria.";
 
+    // Constructor sin routing key: se genera automáticamente
+    public Event(EventType type, K key, T data) {
+        this.type = type;
+        this.key = key;
+        this.data = data;
+        this.routingKey = null; // Se generará dinámicamente
+
+        assertTipoPresente();
+    }
+
+    // Constructor con routing key explícita (para casos especiales)
     public Event(EventType type, K key, T data, String routingKey) {
         this.type = type;
         this.key = key;
@@ -45,7 +58,19 @@ public class Event<K, T> {
     }
 
     public String routingKey() {
-        return routingKey;
+        // Si se proporcionó una routing key explícita, usarla
+        if (routingKey != null && !routingKey.isBlank()) {
+            return routingKey;
+        }
+        // Caso contrario, generar automáticamente: "NombreClase.TIPO_EVENTO"
+        // Ej: "RatingActualizadoEvent.CREATE"
+        return data.getClass().getSimpleName() + "." + type;
+    }
+
+    // Método adicional para compatibilidad con Jackson
+    @JsonIgnore
+    public String getRoutingkey() {
+        return routingKey();
     }
 
 }

@@ -10,13 +10,12 @@ spring:
     hibernate:
       ddl-auto: update
   rabbitmq:
-    host: rabbit
+    host: rabbitmq
     port: 5672
-    username: videoclub
-    password: videoclub
+    username: guest
+    password: guest
 
 rating:
   rabbitmq:
-    exchange: rating.exchange
-    queue: rating.queue
-    routing-key: rating.#
+    exchange: exchange_videocloud00
+    routing-key: RatingActualizadoEvent

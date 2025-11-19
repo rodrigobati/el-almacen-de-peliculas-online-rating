@@ -1,9 +1,8 @@
 package unrn.rating.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,19 +10,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
+    /**
+     * Exchange tipo 'topic' para publicar eventos de cambios en ratings.
+     * Usa el mismo exchange que la vertical Catálogo ('exchange_videocloud00')
+     * pero con tipo 'topic' para soportar routing keys dinámicas como
+     * 'RatingActualizadoEvent.CREATE'
+     */
     @Bean
-    public TopicExchange ratingExchange(@Value("${rating.rabbitmq.exchange:rating.exchange}") String exchangeName) {
+    public TopicExchange peliculasExchange(
+            @Value("${rating.rabbitmq.exchange:exchange_videocloud00}") String exchangeName) {
         return new TopicExchange(exchangeName);
     }
 
+    /**
+     * Convierte los mensajes a JSON para serialización/deserialización automática
+     */
     @Bean
-    public Queue ratingQueue(@Value("${rating.rabbitmq.queue:rating.queue}") String queueName) {
-        return new Queue(queueName, true);
-    }
-
-    @Bean
-    public Binding binding(Queue ratingQueue, TopicExchange ratingExchange,
-            @Value("${rating.rabbitmq.routing-key:rating.#}") String routingKey) {
-        return BindingBuilder.bind(ratingQueue).to(ratingExchange).with(routingKey);
+    public MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
     }
 }

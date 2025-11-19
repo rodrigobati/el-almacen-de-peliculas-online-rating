@@ -7,6 +7,7 @@ import unrn.rating.repository.RatingRepository;
 import unrn.rating.messaging.Event;
 import unrn.rating.messaging.EventType;
 import unrn.rating.messaging.MessagePublisher;
+import unrn.rating.messaging.RatingActualizadoEvent;
 
 import java.util.List;
 
@@ -24,8 +25,23 @@ public class RatingService {
     @Transactional
     public Rating createRating(Rating rating) {
         Rating saved = repository.save(rating);
-        // publish domain event
-        Event<Long, Rating> event = new Event<>(EventType.CREATE, saved.id(), saved, "rating.created");
+
+        // Calcular datos agregados para el catálogo
+        double promedio = promedioPorPelicula(saved.peliculaId());
+        long totalRatings = repository.countByPeliculaId(saved.peliculaId());
+
+        // Crear evento compatible con formato que espera Catálogo
+        var datosAgregados = new RatingActualizadoEvent(
+                saved.peliculaId(),
+                (int) Math.round(promedio),
+                totalRatings);
+
+        // Routing key se genera automáticamente: "RatingActualizadoEvent.CREATE"
+        Event<String, RatingActualizadoEvent> event = new Event<>(
+                EventType.CREATE,
+                saved.peliculaId().toString(),
+                datosAgregados);
+        
         publisher.publish(event);
         return saved;
     }

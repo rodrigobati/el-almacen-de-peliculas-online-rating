@@ -14,7 +14,7 @@ public class RatingMapper {
         return dto;
     }
 
-    public static Rating toModel(RatingRequestDto req) {
-        return Rating.crear(req.peliculaId, req.usuarioId, req.valor, req.comentario);
+    public static Rating toModel(RatingRequestDto req, String usuarioId) {
+        return Rating.crear(req.peliculaId, usuarioId, req.valor, req.comentario);
     }
 }

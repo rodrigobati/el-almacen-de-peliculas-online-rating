@@ -1,6 +1,8 @@
 package unrn.rating.api;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import unrn.rating.model.Rating;
 import unrn.rating.service.RatingService;
@@ -19,8 +21,12 @@ public class RatingController {
     }
 
     @PostMapping
-    public ResponseEntity<RatingResponseDto> crear(@RequestBody RatingRequestDto req) {
-        Rating rating = RatingMapper.toModel(req);
+    public ResponseEntity<RatingResponseDto> crear(
+            @RequestBody RatingRequestDto req,
+            @AuthenticationPrincipal Jwt jwt) {
+        // Extraer el userId del JWT (claim "sub" contiene el ID de usuario de Keycloak)
+        String usuarioId = jwt.getSubject();
+        Rating rating = RatingMapper.toModel(req, usuarioId);
         Rating saved = service.createRating(rating);
         return ResponseEntity.ok(RatingMapper.toDto(saved));
     }
@@ -38,7 +44,13 @@ public class RatingController {
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<RatingResponseDto>> porUsuario(@PathVariable String usuarioId) {
+    public ResponseEntity<List<RatingResponseDto>> porUsuario(
+            @PathVariable String usuarioId,
+            @AuthenticationPrincipal Jwt jwt) {
+        // Opcional: validar que el usuario solo pueda ver sus propios ratings
+        // String usuarioIdToken = jwt.getSubject();
+        // if (!usuarioIdToken.equals(usuarioId)) throw new AccessDeniedException("...");
+        
         var list = service.ratingsPorUsuario(usuarioId).stream().map(RatingMapper::toDto).collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
