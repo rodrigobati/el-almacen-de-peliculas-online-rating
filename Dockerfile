@@ -14,6 +14,9 @@ WORKDIR /app
 
 ARG JAR_FILE=target/rating-0.0.1-SNAPSHOT.jar
 
+# Instalar curl para healthchecks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Copiamos el jar desde la imagen de build
 COPY --from=build /app/${JAR_FILE} app.jar
 
