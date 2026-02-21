@@ -2,11 +2,12 @@ package unrn.rating.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,38 +23,47 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        @Value("${security.keycloak.client-id:}")
+        private String keycloakClientId;
 
-        http
-                .cors(withDefaults())
-                .csrf(AbstractHttpConfigurer::disable);
+        @Bean
+        public WebSecurityCustomizer webSecurityCustomizer() {
+                return web -> web.ignoring().requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/actuator/info",
+                                "/actuator/info/**");
+        }
 
-        http.sessionManagement(sessionManagement ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        );
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .authorizeHttpRequests(registry -> registry
-                        .requestMatchers("/actuator/**", "/metrics/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2Configurer -> 
-                        oauth2Configurer.jwt(jwtConfigurer -> 
-                                jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+                http
+                                .cors(withDefaults())
+                                .csrf(AbstractHttpConfigurer::disable);
 
-        return http.build();
-    }
+                http.sessionManagement(sessionManagement -> sessionManagement
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-    @Bean
-    GrantedAuthorityDefaults grantedAuthorityDefaults() {
-        return new GrantedAuthorityDefaults(""); // Remove the ROLE_ prefix
-    }
+                http
+                                .authorizeHttpRequests(registry -> registry
+                                                .requestMatchers("/actuator/health", "/actuator/health/**",
+                                                                "/actuator/info", "/actuator/info/**")
+                                                .permitAll()
+                                                // Keep other actuator endpoints secured by requiring authentication
+                                                .requestMatchers("/actuator/**", "/metrics/**").authenticated()
+                                                .anyRequest().authenticated())
+                                .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer
+                                                .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(
+                                                                jwtAuthenticationConverter())));
 
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new KeycloakGrantedAuthoritiesConverter());
-        return converter;
-    }
+                return http.build();
+        }
+
+        @Bean
+        public JwtAuthenticationConverter jwtAuthenticationConverter() {
+                JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+                converter.setJwtGrantedAuthoritiesConverter(new KeycloakGrantedAuthoritiesConverter(keycloakClientId));
+                return converter;
+        }
 }
