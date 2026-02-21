@@ -15,6 +15,18 @@ spring:
     username: guest
     password: guest
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      access: unrestricted
+      show-details: never
+    info:
+      access: unrestricted
+
 rating:
   rabbitmq:
     exchange: exchange_videocloud00
