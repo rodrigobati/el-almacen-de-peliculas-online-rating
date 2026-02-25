@@ -34,6 +34,11 @@ public class Rating {
         // sólo JPA
     }
 
+    @Deprecated
+    protected Rating() {
+        // Solo para JPA/Hibernate
+    }
+
     private Rating(Long peliculaId,
             String usuarioId,
             Puntaje puntaje,
