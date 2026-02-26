@@ -24,6 +24,11 @@ public class RatingService {
 
     @Transactional
     public Rating createRating(Rating rating) {
+        // Rechazar si el mismo usuario ya calificó la película
+        if (repository.existsByPeliculaIdAndUsuarioId(rating.peliculaId(), rating.usuarioId())) {
+            throw new DuplicateRatingException();
+        }
+
         Rating saved = repository.save(rating);
 
         // Calcular datos agregados para el catálogo
@@ -41,7 +46,7 @@ public class RatingService {
                 EventType.CREATE,
                 saved.peliculaId().toString(),
                 datosAgregados);
-        
+
         publisher.publish(event);
         return saved;
     }

@@ -59,6 +59,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Postgres driver (for optional Keycloak user lookup) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
