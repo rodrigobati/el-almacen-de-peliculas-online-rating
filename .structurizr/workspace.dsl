@@ -74,8 +74,6 @@ workspace "Rating - El Almacén de Películas Online" "Vertical de gestión de r
             # Contenedor: Repositorio de Datos
             repository = container "Rating Repository" "Acceso a datos con Spring Data JPA; realiza queries y operaciones CRUD" "Spring Data JPA" "RepositoryContainer" {
                 ratingRepository = component "RatingRepository" "Spring Data JPA Repository. Define queries personalizadas: existsByPeliculaIdAndUsuarioId, findByPeliculaId, countByPeliculaId" "Spring Data JPA" "RepositoryComponent"
-
-                ratingRepository -> database "Ejecuta queries CRUD"
             }
 
             # Contenedor: DTOs (Data Transfer Objects)
@@ -112,6 +110,10 @@ workspace "Rating - El Almacén de Películas Online" "Vertical de gestión de r
             repository -> database "Lee/Escribe datos"
             domain -> dtos "Convierte a/desde DTOs"
             dtos -> apiRest "Serializa respuestas"
+
+            # Relaciones adicionales para vistas dinámicas
+            apiRest -> frontend "Retorna respuestas HTTP"
+            appService -> appService "Calcula estadísticas"
         }
 
         # ========================================
@@ -138,10 +140,6 @@ workspace "Rating - El Almacén de Películas Online" "Vertical de gestión de r
         # Sistema de Películas (Contexto)
         ratingVertical -> sistemaPeliculas "Obtiene metadatos de películas"
 
-        # Relaciones adicionales para vistas dinámicas
-        ratingVertical.apiRest -> frontend "Retorna respuestas HTTP"
-        ratingVertical.appService -> ratingVertical.appService "Calcula estadísticas"
-        ratingVertical.repository -> database "Recupera registros"
 
     }
 
@@ -243,7 +241,7 @@ workspace "Rating - El Almacén de Películas Online" "Vertical de gestión de r
             apiGateway -> ratingVertical.apiRest "3. Enruta solicitud"
             ratingVertical.apiRest -> ratingVertical.appService "4. Consulta ratings"
             ratingVertical.appService -> ratingVertical.repository "5. Query a BD"
-            ratingVertical.repository -> database "6. Recupera registros"
+            ratingVertical.repository -> ratingVertical.database "6. Recupera registros"
             ratingVertical.appService -> ratingVertical.appService "7. Calcula estadísticas"
             ratingVertical.apiRest -> frontend "8. Retorna lista de ratings"
             frontend -> usuario "9. Renderiza ratings en UI"
@@ -429,9 +427,6 @@ workspace "Rating - El Almacén de Películas Online" "Vertical de gestión de r
 
     }
 
-    configuration {
-        scope AnyScope
-    }
 
 }
 

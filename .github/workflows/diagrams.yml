@@ -1,0 +1,27 @@
+name: Generate Architecture Diagrams
+
+on:
+  push:
+    paths:
+      - '.structurizr/workspace.dsl'
+
+jobs:
+  export-diagrams:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Export Diagrams to Mermaid/PNG
+        run: |
+          # Usamos el CLI de Structurizr para exportar el DSL a Mermaid
+          docker run --rm -v ${{ github.workspace }}/.structurizr:/usr/local/structurizr structurizr/cli \
+          export -workspace workspace.dsl -format mermaid
+
+      - name: Commit and Push Diagrams
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .structurizr/*.mmd
+          git commit -m "docs: update architecture diagrams [skip ci]" || echo "No changes to commit"
+          git push
