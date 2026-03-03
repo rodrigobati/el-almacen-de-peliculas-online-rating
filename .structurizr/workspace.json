@@ -1,0 +1,1535 @@
+{
+  "configuration" : { },
+  "description" : "Vertical de gestión de ratings y comentarios de películas",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedAgent" : "structurizr-ui",
+  "lastModifiedDate" : "2026-02-27T19:57:34Z",
+  "model" : {
+    "people" : [ {
+      "description" : "Espectador registrado que califica y comenta películas",
+      "id" : "1",
+      "name" : "Usuario",
+      "properties" : {
+        "structurizr.dsl.identifier" : "usuario"
+      },
+      "relationships" : [ {
+        "description" : "Consulta catálogo y califica películas",
+        "destinationId" : "6",
+        "id" : "69",
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Realiza solicitudes autenticadas",
+        "destinationId" : "5",
+        "id" : "70",
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Person,Usuario"
+    }, {
+      "description" : "Gestiona contenido y políticas de ratings",
+      "id" : "2",
+      "name" : "Administrador",
+      "properties" : {
+        "structurizr.dsl.identifier" : "admin"
+      },
+      "relationships" : [ {
+        "description" : "Gestiona políticas de rating",
+        "destinationId" : "5",
+        "id" : "71",
+        "sourceId" : "2",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Person,Administrador"
+    } ],
+    "softwareSystems" : [ {
+      "description" : "Plataforma central de gestión de películas y catálogo",
+      "documentation" : { },
+      "id" : "3",
+      "name" : "El Almacén de Películas Online",
+      "properties" : {
+        "structurizr.dsl.identifier" : "sistemaPeliculas"
+      },
+      "tags" : "Element,Software System,SistemaExterno"
+    }, {
+      "description" : "Gestor de identidad y autorización con roles OAuth2/OIDC",
+      "documentation" : { },
+      "id" : "4",
+      "name" : "Keycloak",
+      "properties" : {
+        "structurizr.dsl.identifier" : "keycloak"
+      },
+      "tags" : "Element,Software System,SistemaExterno"
+    }, {
+      "description" : "Punto de entrada único; valida JWT y enruta solicitudes hacia los microservicios",
+      "documentation" : { },
+      "id" : "5",
+      "name" : "API Gateway",
+      "properties" : {
+        "structurizr.dsl.identifier" : "apiGateway"
+      },
+      "relationships" : [ {
+        "description" : "Valida JWT con Keycloak",
+        "destinationId" : "4",
+        "id" : "72",
+        "sourceId" : "5",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Enruta solicitudes a /api/ratings",
+        "destinationId" : "10",
+        "id" : "75",
+        "sourceId" : "5",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Enruta solicitudes a /api/ratings",
+        "destinationId" : "9",
+        "id" : "76",
+        "linkedRelationshipId" : "75",
+        "sourceId" : "5"
+      } ],
+      "tags" : "Element,Software System,SistemaExterno"
+    }, {
+      "description" : "SPA responsable que consume servicios REST del vertical de Rating",
+      "documentation" : { },
+      "id" : "6",
+      "name" : "Frontend React Vite",
+      "properties" : {
+        "structurizr.dsl.identifier" : "frontend"
+      },
+      "relationships" : [ {
+        "description" : "HTTP REST con JWT en headers",
+        "destinationId" : "5",
+        "id" : "74",
+        "sourceId" : "6",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Software System,Cliente"
+    }, {
+      "description" : "Broker de mensajería para comunicación asincrónica entre microservicios (Eventos)",
+      "documentation" : { },
+      "id" : "7",
+      "name" : "RabbitMQ",
+      "properties" : {
+        "structurizr.dsl.identifier" : "rabbitmq"
+      },
+      "relationships" : [ {
+        "description" : "Consume eventos para actualizar estadísticas",
+        "destinationId" : "8",
+        "id" : "78",
+        "sourceId" : "7",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Software System,Infraestructura"
+    }, {
+      "description" : "Vertical que consume eventos de actualización de ratings para mantener estadísticas agregadas",
+      "documentation" : { },
+      "id" : "8",
+      "name" : "Catálogo Service",
+      "properties" : {
+        "structurizr.dsl.identifier" : "catalogoService"
+      },
+      "tags" : "Element,Software System,SistemaExterno"
+    }, {
+      "containers" : [ {
+        "components" : [ {
+          "description" : "Expone endpoints REST: POST /api/ratings, GET /api/ratings/pelicula/{id}, etc.",
+          "documentation" : { },
+          "id" : "11",
+          "name" : "RatingController",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.apiRest.ratingController"
+          },
+          "relationships" : [ {
+            "description" : "Convierte DTOs a modelos",
+            "destinationId" : "12",
+            "id" : "15",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Deserializa solicitudes",
+            "destinationId" : "13",
+            "id" : "16",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Serializa respuestas",
+            "destinationId" : "14",
+            "id" : "17",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,ControllerComponent",
+          "technology" : "Spring REST Controller"
+        }, {
+          "description" : "Mapea entre DTOs y entidades del dominio",
+          "documentation" : { },
+          "id" : "12",
+          "name" : "RatingMapper",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.apiRest.ratingMapper"
+          },
+          "relationships" : [ {
+            "description" : "Lee datos de entrada",
+            "destinationId" : "13",
+            "id" : "18",
+            "sourceId" : "12",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Genera datos de salida",
+            "destinationId" : "14",
+            "id" : "19",
+            "sourceId" : "12",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,MapperComponent",
+          "technology" : "Mapper Utility"
+        }, {
+          "description" : "DTO para solicitudes HTTP: peliculaId, valor, comentario",
+          "documentation" : { },
+          "id" : "13",
+          "name" : "RatingRequestDto",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.apiRest.requestDto"
+          },
+          "tags" : "Element,Component,DTOComponent",
+          "technology" : "Data Transfer Object"
+        }, {
+          "description" : "DTO para respuestas HTTP: id, usuario, puntaje, comentario, fechaCreacion",
+          "documentation" : { },
+          "id" : "14",
+          "name" : "RatingResponseDto",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.apiRest.responseDto"
+          },
+          "tags" : "Element,Component,DTOComponent",
+          "technology" : "Data Transfer Object"
+        } ],
+        "description" : "Expone endpoints HTTP/REST protegidos por JWT para crear y consultar ratings",
+        "documentation" : { },
+        "id" : "10",
+        "name" : "API REST Rating",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.apiRest"
+        },
+        "relationships" : [ {
+          "description" : "Delega lógica de negocio",
+          "destinationId" : "20",
+          "id" : "58",
+          "sourceId" : "10",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Valida JWT y autorización",
+          "destinationId" : "40",
+          "id" : "59",
+          "sourceId" : "10",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Retorna respuestas HTTP",
+          "destinationId" : "6",
+          "id" : "66",
+          "sourceId" : "10",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,APIContainer",
+        "technology" : "Spring Boot REST Controller"
+      }, {
+        "components" : [ {
+          "description" : "Orquesta la creación, actualización y consulta de ratings. Publica eventos asincronos.",
+          "documentation" : { },
+          "id" : "21",
+          "name" : "RatingService",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.appService.ratingService"
+          },
+          "relationships" : [ {
+            "description" : "Obtiene información de usuarios",
+            "destinationId" : "22",
+            "id" : "24",
+            "sourceId" : "21",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Lanza excepción en duplicados",
+            "destinationId" : "23",
+            "id" : "25",
+            "sourceId" : "21",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,ServiceComponent",
+          "technology" : "Spring Service"
+        }, {
+          "description" : "Integración con Keycloak para obtener usernames y validación de usuarios",
+          "documentation" : { },
+          "id" : "22",
+          "name" : "KeycloakUserService",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.appService.keycloakUserService"
+          },
+          "tags" : "Element,Component,ExternalServiceComponent",
+          "technology" : "Service"
+        }, {
+          "description" : "Excepción personalizada para validar ratings únicos por usuario-película",
+          "documentation" : { },
+          "id" : "23",
+          "name" : "DuplicateRatingException",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.appService.duplicateRatingException"
+          },
+          "tags" : "Element,Component,ExceptionComponent",
+          "technology" : "Custom Exception"
+        } ],
+        "description" : "Contiene la lógica de negocio principal: validación, persistencia y eventos",
+        "documentation" : { },
+        "id" : "20",
+        "name" : "Rating Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.appService"
+        },
+        "relationships" : [ {
+          "description" : "Crea y manipula entidades del dominio",
+          "destinationId" : "26",
+          "id" : "60",
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Persiste y consulta datos",
+          "destinationId" : "37",
+          "id" : "61",
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Publica eventos de cambios",
+          "destinationId" : "47",
+          "id" : "62",
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Calcula estadísticas",
+          "destinationId" : "20",
+          "id" : "68",
+          "sourceId" : "20",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,ServiceContainer",
+        "technology" : "Spring Boot Service"
+      }, {
+        "components" : [ {
+          "description" : "Representa una calificación de película: peliculaId, usuarioId, puntaje, comentario, timestamp. Encapsula validaciones.",
+          "documentation" : { },
+          "id" : "27",
+          "name" : "Rating (Entidad)",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.domain.rating"
+          },
+          "relationships" : [ {
+            "description" : "Contiene",
+            "destinationId" : "28",
+            "id" : "32",
+            "sourceId" : "27",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Contiene",
+            "destinationId" : "29",
+            "id" : "33",
+            "sourceId" : "27",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Referencia",
+            "destinationId" : "30",
+            "id" : "34",
+            "sourceId" : "27",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Referencia",
+            "destinationId" : "31",
+            "id" : "35",
+            "sourceId" : "27",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,EntityComponent",
+          "technology" : "JPA Entity"
+        }, {
+          "description" : "Representa el valor numérico del rating (1-10). Encapsula validaciones de rango.",
+          "documentation" : { },
+          "id" : "28",
+          "name" : "Puntaje (Value Object)",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.domain.puntaje"
+          },
+          "tags" : "Element,Component,ValueObjectComponent",
+          "technology" : "JPA Embeddable"
+        }, {
+          "description" : "Texto del comentario asociado al rating. Validaciones de no vacío.",
+          "documentation" : { },
+          "id" : "29",
+          "name" : "Comentario (Value Object)",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.domain.comentario"
+          },
+          "tags" : "Element,Component,ValueObjectComponent",
+          "technology" : "JPA Embeddable"
+        }, {
+          "description" : "Identificador único de película. Encapsula tipo y validaciones.",
+          "documentation" : { },
+          "id" : "30",
+          "name" : "PeliculaId (Value Object)",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.domain.peliculaId"
+          },
+          "tags" : "Element,Component,ValueObjectComponent",
+          "technology" : "Value Object"
+        }, {
+          "description" : "Identificador único de usuario de Keycloak. Encapsula tipo y validaciones.",
+          "documentation" : { },
+          "id" : "31",
+          "name" : "UsuarioId (Value Object)",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.domain.usuarioId"
+          },
+          "tags" : "Element,Component,ValueObjectComponent",
+          "technology" : "Value Object"
+        } ],
+        "description" : "Encapsula las reglas de negocio: Rating, Puntaje, Comentario, PeliculaId, UsuarioId",
+        "documentation" : { },
+        "id" : "26",
+        "name" : "Modelo de Dominio",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.domain"
+        },
+        "relationships" : [ {
+          "description" : "Convierte a/desde DTOs",
+          "destinationId" : "39",
+          "id" : "64",
+          "sourceId" : "26",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,DomainContainer",
+        "technology" : "Java POJOs + JPA"
+      }, {
+        "description" : "Almacena ratings, puntajes, comentarios y metadatos de usuarios",
+        "documentation" : { },
+        "id" : "36",
+        "name" : "Base de Datos MySQL",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.database"
+        },
+        "tags" : "Element,Container,DatabaseContainer",
+        "technology" : "MySQL 8.0"
+      }, {
+        "components" : [ {
+          "description" : "Spring Data JPA Repository. Define queries personalizadas: existsByPeliculaIdAndUsuarioId, findByPeliculaId, countByPeliculaId",
+          "documentation" : { },
+          "id" : "38",
+          "name" : "RatingRepository",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.repository.ratingRepository"
+          },
+          "tags" : "Element,Component,RepositoryComponent",
+          "technology" : "Spring Data JPA"
+        } ],
+        "description" : "Acceso a datos con Spring Data JPA; realiza queries y operaciones CRUD",
+        "documentation" : { },
+        "id" : "37",
+        "name" : "Rating Repository",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.repository"
+        },
+        "relationships" : [ {
+          "description" : "Lee/Escribe datos",
+          "destinationId" : "36",
+          "id" : "63",
+          "sourceId" : "37",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,RepositoryContainer",
+        "technology" : "Spring Data JPA"
+      }, {
+        "description" : "Objetos para transferencia de datos: RatingRequestDto, RatingResponseDto, RatingActualizadoEvent",
+        "documentation" : { },
+        "id" : "39",
+        "name" : "DTOs y Mappers",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.dtos"
+        },
+        "relationships" : [ {
+          "description" : "Serializa respuestas",
+          "destinationId" : "10",
+          "id" : "65",
+          "sourceId" : "39",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,DTOContainer",
+        "technology" : "Java POJOs"
+      }, {
+        "components" : [ {
+          "description" : "Configura filtros de seguridad, validación de JWT OAuth2 y control de acceso basado en roles",
+          "documentation" : { },
+          "id" : "41",
+          "name" : "SecurityConfiguration",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.securityConfig.securityConfiguration"
+          },
+          "relationships" : [ {
+            "description" : "Usa para procesar JWT",
+            "destinationId" : "42",
+            "id" : "43",
+            "sourceId" : "41",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Valida tokens",
+            "destinationId" : "4",
+            "id" : "44",
+            "sourceId" : "41",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,SecurityComponent",
+          "technology" : "Spring Security Config"
+        }, {
+          "description" : "Convierte claims del JWT de Keycloak a autoridades de Spring Security",
+          "documentation" : { },
+          "id" : "42",
+          "name" : "KeycloakGrantedAuthoritiesConverter",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.securityConfig.jwtConverter"
+          },
+          "tags" : "Element,Component,SecurityComponent",
+          "technology" : "JWT Converter"
+        } ],
+        "description" : "Configura filtros JWT, validación de tokens OAuth2 y autorización basada en roles",
+        "documentation" : { },
+        "id" : "40",
+        "name" : "Configuración de Seguridad",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.securityConfig"
+        },
+        "relationships" : [ {
+          "description" : "Valida tokens",
+          "destinationId" : "4",
+          "id" : "45",
+          "linkedRelationshipId" : "44",
+          "sourceId" : "40"
+        }, {
+          "description" : "Obtiene clave pública para validar JWT",
+          "destinationId" : "4",
+          "id" : "73",
+          "sourceId" : "40",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,SecurityContainer",
+        "technology" : "Spring Security + OAuth2"
+      }, {
+        "components" : [ {
+          "description" : "Define exchanges (topic), colas y configuración de JSON converter para serialización",
+          "documentation" : { },
+          "id" : "48",
+          "name" : "RabbitMQConfig",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.messagingConfig.rabbitConfig"
+          },
+          "relationships" : [ {
+            "description" : "Configura",
+            "destinationId" : "7",
+            "id" : "52",
+            "sourceId" : "48",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,MessagingComponent",
+          "technology" : "Spring AMQP Config"
+        }, {
+          "description" : "Publica eventos RatingActualizadoEvent en el exchange de RabbitMQ",
+          "documentation" : { },
+          "id" : "49",
+          "name" : "MessagePublisher",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.messagingConfig.messagePublisher"
+          },
+          "relationships" : [ {
+            "description" : "Publica",
+            "destinationId" : "50",
+            "id" : "55",
+            "sourceId" : "49",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Envía a exchange_videocloud00",
+            "destinationId" : "7",
+            "id" : "56",
+            "sourceId" : "49",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,MessagingComponent",
+          "technology" : "Message Publisher"
+        }, {
+          "description" : "Evento de dominio: peliculaId, promedio, totalRatings. Routing key: RatingActualizadoEvent.CREATE",
+          "documentation" : { },
+          "id" : "50",
+          "name" : "RatingActualizadoEvent",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.messagingConfig.ratingActualizadoEvent"
+          },
+          "tags" : "Element,Component,EventComponent",
+          "technology" : "Event DTO"
+        }, {
+          "description" : "Placeholder para consumir eventos (actualmente deshabilitado)",
+          "documentation" : { },
+          "id" : "51",
+          "name" : "MessageListener",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ratingVertical.messagingConfig.messageListener"
+          },
+          "relationships" : [ {
+            "description" : "Escucha (no usado actualmente)",
+            "destinationId" : "7",
+            "id" : "57",
+            "sourceId" : "51",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,MessagingComponent",
+          "technology" : "Message Listener"
+        } ],
+        "description" : "Configuración de exchanges y publicación de eventos de cambios en ratings",
+        "documentation" : { },
+        "id" : "47",
+        "name" : "RabbitMQ Config & Publisher",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ratingVertical.messagingConfig"
+        },
+        "relationships" : [ {
+          "description" : "Configura",
+          "destinationId" : "7",
+          "id" : "53",
+          "linkedRelationshipId" : "52",
+          "sourceId" : "47"
+        }, {
+          "description" : "Publica RatingActualizadoEvent (CREATE, UPDATE)",
+          "destinationId" : "7",
+          "id" : "77",
+          "sourceId" : "47",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,MessagingContainer",
+        "technology" : "Spring AMQP"
+      } ],
+      "description" : "Vertical responsable de gestión de ratings, puntajes y comentarios de películas",
+      "documentation" : { },
+      "id" : "9",
+      "name" : "Rating Service",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ratingVertical"
+      },
+      "relationships" : [ {
+        "description" : "Valida tokens",
+        "destinationId" : "4",
+        "id" : "46",
+        "linkedRelationshipId" : "44",
+        "sourceId" : "9"
+      }, {
+        "description" : "Configura",
+        "destinationId" : "7",
+        "id" : "54",
+        "linkedRelationshipId" : "52",
+        "sourceId" : "9"
+      }, {
+        "description" : "Retorna respuestas HTTP",
+        "destinationId" : "6",
+        "id" : "67",
+        "linkedRelationshipId" : "66",
+        "sourceId" : "9"
+      }, {
+        "description" : "Obtiene metadatos de películas",
+        "destinationId" : "3",
+        "id" : "79",
+        "sourceId" : "9",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Software System,RatingService"
+    } ]
+  },
+  "name" : "Rating - El Almacén de Películas Online",
+  "properties" : {
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.error" : "60",
+    "structurizr.inspection.warning" : "0",
+    "structurizr.dsl" : "d29ya3NwYWNlICJSYXRpbmcgLSBFbCBBbG1hY8OpbiBkZSBQZWzDrWN1bGFzIE9ubGluZSIgIlZlcnRpY2FsIGRlIGdlc3Rpw7NuIGRlIHJhdGluZ3MgeSBjb21lbnRhcmlvcyBkZSBwZWzDrWN1bGFzIiB7CgogICAgbW9kZWwgewogICAgICAgICFpZGVudGlmaWVycyBoaWVyYXJjaGljYWwKCiAgICAgICAgIyBBY3RvcmVzL1VzdWFyaW9zIGRlbCBTaXN0ZW1hCiAgICAgICAgdXN1YXJpbyA9IHBlcnNvbiAiVXN1YXJpbyIgIkVzcGVjdGFkb3IgcmVnaXN0cmFkbyBxdWUgY2FsaWZpY2EgeSBjb21lbnRhIHBlbMOtY3VsYXMiICJVc3VhcmlvIgogICAgICAgIGFkbWluID0gcGVyc29uICJBZG1pbmlzdHJhZG9yIiAiR2VzdGlvbmEgY29udGVuaWRvIHkgcG9sw610aWNhcyBkZSByYXRpbmdzIiAiQWRtaW5pc3RyYWRvciIKCiAgICAgICAgIyBTaXN0ZW1hIGRlIFBlbMOtY3VsYXMgT25saW5lIChDb250ZXh0byBFeHRlcm5vKQogICAgICAgIHNpc3RlbWFQZWxpY3VsYXMgPSBzb2Z0d2FyZVN5c3RlbSAiRWwgQWxtYWPDqW4gZGUgUGVsw61jdWxhcyBPbmxpbmUiICJQbGF0YWZvcm1hIGNlbnRyYWwgZGUgZ2VzdGnDs24gZGUgcGVsw61jdWxhcyB5IGNhdMOhbG9nbyIgIlNpc3RlbWFFeHRlcm5vIgoKICAgICAgICAjIFNpc3RlbWEgZGUgSWRlbnRpZmljYWNpw7NuIHkgU2VndXJpZGFkIChLZXljbG9haykKICAgICAgICBrZXljbG9hayA9IHNvZnR3YXJlU3lzdGVtICJLZXljbG9hayIgIkdlc3RvciBkZSBpZGVudGlkYWQgeSBhdXRvcml6YWNpw7NuIGNvbiByb2xlcyBPQXV0aDIvT0lEQyIgIlNpc3RlbWFFeHRlcm5vIgoKICAgICAgICAjIEFQSSBHYXRld2F5CiAgICAgICAgYXBpR2F0ZXdheSA9IHNvZnR3YXJlU3lzdGVtICJBUEkgR2F0ZXdheSIgIlB1bnRvIGRlIGVudHJhZGEgw7puaWNvOyB2YWxpZGEgSldUIHkgZW5ydXRhIHNvbGljaXR1ZGVzIGhhY2lhIGxvcyBtaWNyb3NlcnZpY2lvcyIgIlNpc3RlbWFFeHRlcm5vIgoKICAgICAgICAjIEZyb250ZW5kIFNQQQogICAgICAgIGZyb250ZW5kID0gc29mdHdhcmVTeXN0ZW0gIkZyb250ZW5kIFJlYWN0IFZpdGUiICJTUEEgcmVzcG9uc2FibGUgcXVlIGNvbnN1bWUgc2VydmljaW9zIFJFU1QgZGVsIHZlcnRpY2FsIGRlIFJhdGluZyIgIkNsaWVudGUiCgogICAgICAgICMgTWVzc2FnZSBCcm9rZXIKICAgICAgICByYWJiaXRtcSA9IHNvZnR3YXJlU3lzdGVtICJSYWJiaXRNUSIgIkJyb2tlciBkZSBtZW5zYWplcsOtYSBwYXJhIGNvbXVuaWNhY2nDs24gYXNpbmNyw7NuaWNhIGVudHJlIG1pY3Jvc2VydmljaW9zIChFdmVudG9zKSIgIkluZnJhZXN0cnVjdHVyYSIKCiAgICAgICAgIyBDYXTDoWxvZ28gKENvbnN1bWUgbG9zIGV2ZW50b3MgZGUgUmF0aW5nKQogICAgICAgIGNhdGFsb2dvU2VydmljZSA9IHNvZnR3YXJlU3lzdGVtICJDYXTDoWxvZ28gU2VydmljZSIgIlZlcnRpY2FsIHF1ZSBjb25zdW1lIGV2ZW50b3MgZGUgYWN0dWFsaXphY2nDs24gZGUgcmF0aW5ncyBwYXJhIG1hbnRlbmVyIGVzdGFkw61zdGljYXMgYWdyZWdhZGFzIiAiU2lzdGVtYUV4dGVybm8iCgogICAgICAgICMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICAgICAgICMgVkVSVElDQUwgREUgUkFUSU5HIC0gQ29udGVuZWRvcmVzCiAgICAgICAgIyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgICAgICAgcmF0aW5nVmVydGljYWwgPSBzb2Z0d2FyZVN5c3RlbSAiUmF0aW5nIFNlcnZpY2UiICJWZXJ0aWNhbCByZXNwb25zYWJsZSBkZSBnZXN0acOzbiBkZSByYXRpbmdzLCBwdW50YWplcyB5IGNvbWVudGFyaW9zIGRlIHBlbMOtY3VsYXMiICJSYXRpbmdTZXJ2aWNlIiB7CgogICAgICAgICAgICAjIENvbnRlbmVkb3I6IEFQSSBSRVNUCiAgICAgICAgICAgIGFwaVJlc3QgPSBjb250YWluZXIgIkFQSSBSRVNUIFJhdGluZyIgIkV4cG9uZSBlbmRwb2ludHMgSFRUUC9SRVNUIHByb3RlZ2lkb3MgcG9yIEpXVCBwYXJhIGNyZWFyIHkgY29uc3VsdGFyIHJhdGluZ3MiICJTcHJpbmcgQm9vdCBSRVNUIENvbnRyb2xsZXIiICJBUElDb250YWluZXIiIHsKICAgICAgICAgICAgICAgIHJhdGluZ0NvbnRyb2xsZXIgPSBjb21wb25lbnQgIlJhdGluZ0NvbnRyb2xsZXIiICJFeHBvbmUgZW5kcG9pbnRzIFJFU1Q6IFBPU1QgL2FwaS9yYXRpbmdzLCBHRVQgL2FwaS9yYXRpbmdzL3BlbGljdWxhL3tpZH0sIGV0Yy4iICJTcHJpbmcgUkVTVCBDb250cm9sbGVyIiAiQ29udHJvbGxlckNvbXBvbmVudCIKICAgICAgICAgICAgICAgIHJhdGluZ01hcHBlciA9IGNvbXBvbmVudCAiUmF0aW5nTWFwcGVyIiAiTWFwZWEgZW50cmUgRFRPcyB5IGVudGlkYWRlcyBkZWwgZG9taW5pbyIgIk1hcHBlciBVdGlsaXR5IiAiTWFwcGVyQ29tcG9uZW50IgogICAgICAgICAgICAgICAgcmVxdWVzdER0byA9IGNvbXBvbmVudCAiUmF0aW5nUmVxdWVzdER0byIgIkRUTyBwYXJhIHNvbGljaXR1ZGVzIEhUVFA6IHBlbGljdWxhSWQsIHZhbG9yLCBjb21lbnRhcmlvIiAiRGF0YSBUcmFuc2ZlciBPYmplY3QiICJEVE9Db21wb25lbnQiCiAgICAgICAgICAgICAgICByZXNwb25zZUR0byA9IGNvbXBvbmVudCAiUmF0aW5nUmVzcG9uc2VEdG8iICJEVE8gcGFyYSByZXNwdWVzdGFzIEhUVFA6IGlkLCB1c3VhcmlvLCBwdW50YWplLCBjb21lbnRhcmlvLCBmZWNoYUNyZWFjaW9uIiAiRGF0YSBUcmFuc2ZlciBPYmplY3QiICJEVE9Db21wb25lbnQiCgogICAgICAgICAgICAgICAgcmF0aW5nQ29udHJvbGxlciAtPiByYXRpbmdNYXBwZXIgIkNvbnZpZXJ0ZSBEVE9zIGEgbW9kZWxvcyIKICAgICAgICAgICAgICAgIHJhdGluZ0NvbnRyb2xsZXIgLT4gcmVxdWVzdER0byAiRGVzZXJpYWxpemEgc29saWNpdHVkZXMiCiAgICAgICAgICAgICAgICByYXRpbmdDb250cm9sbGVyIC0+IHJlc3BvbnNlRHRvICJTZXJpYWxpemEgcmVzcHVlc3RhcyIKICAgICAgICAgICAgICAgIHJhdGluZ01hcHBlciAtPiByZXF1ZXN0RHRvICJMZWUgZGF0b3MgZGUgZW50cmFkYSIKICAgICAgICAgICAgICAgIHJhdGluZ01hcHBlciAtPiByZXNwb25zZUR0byAiR2VuZXJhIGRhdG9zIGRlIHNhbGlkYSIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgIyBDb250ZW5lZG9yOiBTZXJ2aWNpbyBkZSBBcGxpY2FjacOzbgogICAgICAgICAgICBhcHBTZXJ2aWNlID0gY29udGFpbmVyICJSYXRpbmcgU2VydmljZSIgIkNvbnRpZW5lIGxhIGzDs2dpY2EgZGUgbmVnb2NpbyBwcmluY2lwYWw6IHZhbGlkYWNpw7NuLCBwZXJzaXN0ZW5jaWEgeSBldmVudG9zIiAiU3ByaW5nIEJvb3QgU2VydmljZSIgIlNlcnZpY2VDb250YWluZXIiIHsKICAgICAgICAgICAgICAgIHJhdGluZ1NlcnZpY2UgPSBjb21wb25lbnQgIlJhdGluZ1NlcnZpY2UiICJPcnF1ZXN0YSBsYSBjcmVhY2nDs24sIGFjdHVhbGl6YWNpw7NuIHkgY29uc3VsdGEgZGUgcmF0aW5ncy4gUHVibGljYSBldmVudG9zIGFzaW5jcm9ub3MuIiAiU3ByaW5nIFNlcnZpY2UiICJTZXJ2aWNlQ29tcG9uZW50IgogICAgICAgICAgICAgICAga2V5Y2xvYWtVc2VyU2VydmljZSA9IGNvbXBvbmVudCAiS2V5Y2xvYWtVc2VyU2VydmljZSIgIkludGVncmFjacOzbiBjb24gS2V5Y2xvYWsgcGFyYSBvYnRlbmVyIHVzZXJuYW1lcyB5IHZhbGlkYWNpw7NuIGRlIHVzdWFyaW9zIiAiU2VydmljZSIgIkV4dGVybmFsU2VydmljZUNvbXBvbmVudCIKICAgICAgICAgICAgICAgIGR1cGxpY2F0ZVJhdGluZ0V4Y2VwdGlvbiA9IGNvbXBvbmVudCAiRHVwbGljYXRlUmF0aW5nRXhjZXB0aW9uIiAiRXhjZXBjacOzbiBwZXJzb25hbGl6YWRhIHBhcmEgdmFsaWRhciByYXRpbmdzIMO6bmljb3MgcG9yIHVzdWFyaW8tcGVsw61jdWxhIiAiQ3VzdG9tIEV4Y2VwdGlvbiIgIkV4Y2VwdGlvbkNvbXBvbmVudCIKCiAgICAgICAgICAgICAgICByYXRpbmdTZXJ2aWNlIC0+IGtleWNsb2FrVXNlclNlcnZpY2UgIk9idGllbmUgaW5mb3JtYWNpw7NuIGRlIHVzdWFyaW9zIgogICAgICAgICAgICAgICAgcmF0aW5nU2VydmljZSAtPiBkdXBsaWNhdGVSYXRpbmdFeGNlcHRpb24gIkxhbnphIGV4Y2VwY2nDs24gZW4gZHVwbGljYWRvcyIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgIyBDb250ZW5lZG9yOiBEb21pbmlvIChNb2RlbG8pCiAgICAgICAgICAgIGRvbWFpbiA9IGNvbnRhaW5lciAiTW9kZWxvIGRlIERvbWluaW8iICJFbmNhcHN1bGEgbGFzIHJlZ2xhcyBkZSBuZWdvY2lvOiBSYXRpbmcsIFB1bnRhamUsIENvbWVudGFyaW8sIFBlbGljdWxhSWQsIFVzdWFyaW9JZCIgIkphdmEgUE9KT3MgKyBKUEEiICJEb21haW5Db250YWluZXIiIHsKICAgICAgICAgICAgICAgIHJhdGluZyA9IGNvbXBvbmVudCAiUmF0aW5nIChFbnRpZGFkKSIgIlJlcHJlc2VudGEgdW5hIGNhbGlmaWNhY2nDs24gZGUgcGVsw61jdWxhOiBwZWxpY3VsYUlkLCB1c3VhcmlvSWQsIHB1bnRhamUsIGNvbWVudGFyaW8sIHRpbWVzdGFtcC4gRW5jYXBzdWxhIHZhbGlkYWNpb25lcy4iICJKUEEgRW50aXR5IiAiRW50aXR5Q29tcG9uZW50IgogICAgICAgICAgICAgICAgcHVudGFqZSA9IGNvbXBvbmVudCAiUHVudGFqZSAoVmFsdWUgT2JqZWN0KSIgIlJlcHJlc2VudGEgZWwgdmFsb3IgbnVtw6lyaWNvIGRlbCByYXRpbmcgKDEtMTApLiBFbmNhcHN1bGEgdmFsaWRhY2lvbmVzIGRlIHJhbmdvLiIgIkpQQSBFbWJlZGRhYmxlIiAiVmFsdWVPYmplY3RDb21wb25lbnQiCiAgICAgICAgICAgICAgICBjb21lbnRhcmlvID0gY29tcG9uZW50ICJDb21lbnRhcmlvIChWYWx1ZSBPYmplY3QpIiAiVGV4dG8gZGVsIGNvbWVudGFyaW8gYXNvY2lhZG8gYWwgcmF0aW5nLiBWYWxpZGFjaW9uZXMgZGUgbm8gdmFjw61vLiIgIkpQQSBFbWJlZGRhYmxlIiAiVmFsdWVPYmplY3RDb21wb25lbnQiCiAgICAgICAgICAgICAgICBwZWxpY3VsYUlkID0gY29tcG9uZW50ICJQZWxpY3VsYUlkIChWYWx1ZSBPYmplY3QpIiAiSWRlbnRpZmljYWRvciDDum5pY28gZGUgcGVsw61jdWxhLiBFbmNhcHN1bGEgdGlwbyB5IHZhbGlkYWNpb25lcy4iICJWYWx1ZSBPYmplY3QiICJWYWx1ZU9iamVjdENvbXBvbmVudCIKICAgICAgICAgICAgICAgIHVzdWFyaW9JZCA9IGNvbXBvbmVudCAiVXN1YXJpb0lkIChWYWx1ZSBPYmplY3QpIiAiSWRlbnRpZmljYWRvciDDum5pY28gZGUgdXN1YXJpbyBkZSBLZXljbG9hay4gRW5jYXBzdWxhIHRpcG8geSB2YWxpZGFjaW9uZXMuIiAiVmFsdWUgT2JqZWN0IiAiVmFsdWVPYmplY3RDb21wb25lbnQiCgogICAgICAgICAgICAgICAgcmF0aW5nIC0+IHB1bnRhamUgIkNvbnRpZW5lIgogICAgICAgICAgICAgICAgcmF0aW5nIC0+IGNvbWVudGFyaW8gIkNvbnRpZW5lIgogICAgICAgICAgICAgICAgcmF0aW5nIC0+IHBlbGljdWxhSWQgIlJlZmVyZW5jaWEiCiAgICAgICAgICAgICAgICByYXRpbmcgLT4gdXN1YXJpb0lkICJSZWZlcmVuY2lhIgogICAgICAgICAgICB9CgogICAgICAgICAgICAjIENvbnRlbmVkb3I6IFBlcnNpc3RlbmNpYQogICAgICAgICAgICBkYXRhYmFzZSA9IGNvbnRhaW5lciAiQmFzZSBkZSBEYXRvcyBNeVNRTCIgIkFsbWFjZW5hIHJhdGluZ3MsIHB1bnRhamVzLCBjb21lbnRhcmlvcyB5IG1ldGFkYXRvcyBkZSB1c3VhcmlvcyIgIk15U1FMIDguMCIgIkRhdGFiYXNlQ29udGFpbmVyIgoKICAgICAgICAgICAgIyBDb250ZW5lZG9yOiBSZXBvc2l0b3JpbyBkZSBEYXRvcwogICAgICAgICAgICByZXBvc2l0b3J5ID0gY29udGFpbmVyICJSYXRpbmcgUmVwb3NpdG9yeSIgIkFjY2VzbyBhIGRhdG9zIGNvbiBTcHJpbmcgRGF0YSBKUEE7IHJlYWxpemEgcXVlcmllcyB5IG9wZXJhY2lvbmVzIENSVUQiICJTcHJpbmcgRGF0YSBKUEEiICJSZXBvc2l0b3J5Q29udGFpbmVyIiB7CiAgICAgICAgICAgICAgICByYXRpbmdSZXBvc2l0b3J5ID0gY29tcG9uZW50ICJSYXRpbmdSZXBvc2l0b3J5IiAiU3ByaW5nIERhdGEgSlBBIFJlcG9zaXRvcnkuIERlZmluZSBxdWVyaWVzIHBlcnNvbmFsaXphZGFzOiBleGlzdHNCeVBlbGljdWxhSWRBbmRVc3VhcmlvSWQsIGZpbmRCeVBlbGljdWxhSWQsIGNvdW50QnlQZWxpY3VsYUlkIiAiU3ByaW5nIERhdGEgSlBBIiAiUmVwb3NpdG9yeUNvbXBvbmVudCIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgIyBDb250ZW5lZG9yOiBEVE9zIChEYXRhIFRyYW5zZmVyIE9iamVjdHMpCiAgICAgICAgICAgIGR0b3MgPSBjb250YWluZXIgIkRUT3MgeSBNYXBwZXJzIiAiT2JqZXRvcyBwYXJhIHRyYW5zZmVyZW5jaWEgZGUgZGF0b3M6IFJhdGluZ1JlcXVlc3REdG8sIFJhdGluZ1Jlc3BvbnNlRHRvLCBSYXRpbmdBY3R1YWxpemFkb0V2ZW50IiAiSmF2YSBQT0pPcyIgIkRUT0NvbnRhaW5lciIKCiAgICAgICAgICAgICMgQ29udGVuZWRvcjogQ29uZmlndXJhY2nDs24gZGUgU2VndXJpZGFkCiAgICAgICAgICAgIHNlY3VyaXR5Q29uZmlnID0gY29udGFpbmVyICJDb25maWd1cmFjacOzbiBkZSBTZWd1cmlkYWQiICJDb25maWd1cmEgZmlsdHJvcyBKV1QsIHZhbGlkYWNpw7NuIGRlIHRva2VucyBPQXV0aDIgeSBhdXRvcml6YWNpw7NuIGJhc2FkYSBlbiByb2xlcyIgIlNwcmluZyBTZWN1cml0eSArIE9BdXRoMiIgIlNlY3VyaXR5Q29udGFpbmVyIiB7CiAgICAgICAgICAgICAgICBzZWN1cml0eUNvbmZpZ3VyYXRpb24gPSBjb21wb25lbnQgIlNlY3VyaXR5Q29uZmlndXJhdGlvbiIgIkNvbmZpZ3VyYSBmaWx0cm9zIGRlIHNlZ3VyaWRhZCwgdmFsaWRhY2nDs24gZGUgSldUIE9BdXRoMiB5IGNvbnRyb2wgZGUgYWNjZXNvIGJhc2FkbyBlbiByb2xlcyIgIlNwcmluZyBTZWN1cml0eSBDb25maWciICJTZWN1cml0eUNvbXBvbmVudCIKICAgICAgICAgICAgICAgIGp3dENvbnZlcnRlciA9IGNvbXBvbmVudCAiS2V5Y2xvYWtHcmFudGVkQXV0aG9yaXRpZXNDb252ZXJ0ZXIiICJDb252aWVydGUgY2xhaW1zIGRlbCBKV1QgZGUgS2V5Y2xvYWsgYSBhdXRvcmlkYWRlcyBkZSBTcHJpbmcgU2VjdXJpdHkiICJKV1QgQ29udmVydGVyIiAiU2VjdXJpdHlDb21wb25lbnQiCgogICAgICAgICAgICAgICAgc2VjdXJpdHlDb25maWd1cmF0aW9uIC0+IGp3dENvbnZlcnRlciAiVXNhIHBhcmEgcHJvY2VzYXIgSldUIgogICAgICAgICAgICAgICAgc2VjdXJpdHlDb25maWd1cmF0aW9uIC0+IGtleWNsb2FrICJWYWxpZGEgdG9rZW5zIgogICAgICAgICAgICB9CgogICAgICAgICAgICAjIENvbnRlbmVkb3I6IE1lc3NhZ2UgQnJva2VyIEludGVncmF0aW9uCiAgICAgICAgICAgIG1lc3NhZ2luZ0NvbmZpZyA9IGNvbnRhaW5lciAiUmFiYml0TVEgQ29uZmlnICYgUHVibGlzaGVyIiAiQ29uZmlndXJhY2nDs24gZGUgZXhjaGFuZ2VzIHkgcHVibGljYWNpw7NuIGRlIGV2ZW50b3MgZGUgY2FtYmlvcyBlbiByYXRpbmdzIiAiU3ByaW5nIEFNUVAiICJNZXNzYWdpbmdDb250YWluZXIiIHsKICAgICAgICAgICAgICAgIHJhYmJpdENvbmZpZyA9IGNvbXBvbmVudCAiUmFiYml0TVFDb25maWciICJEZWZpbmUgZXhjaGFuZ2VzICh0b3BpYyksIGNvbGFzIHkgY29uZmlndXJhY2nDs24gZGUgSlNPTiBjb252ZXJ0ZXIgcGFyYSBzZXJpYWxpemFjacOzbiIgIlNwcmluZyBBTVFQIENvbmZpZyIgIk1lc3NhZ2luZ0NvbXBvbmVudCIKICAgICAgICAgICAgICAgIG1lc3NhZ2VQdWJsaXNoZXIgPSBjb21wb25lbnQgIk1lc3NhZ2VQdWJsaXNoZXIiICJQdWJsaWNhIGV2ZW50b3MgUmF0aW5nQWN0dWFsaXphZG9FdmVudCBlbiBlbCBleGNoYW5nZSBkZSBSYWJiaXRNUSIgIk1lc3NhZ2UgUHVibGlzaGVyIiAiTWVzc2FnaW5nQ29tcG9uZW50IgogICAgICAgICAgICAgICAgcmF0aW5nQWN0dWFsaXphZG9FdmVudCA9IGNvbXBvbmVudCAiUmF0aW5nQWN0dWFsaXphZG9FdmVudCIgIkV2ZW50byBkZSBkb21pbmlvOiBwZWxpY3VsYUlkLCBwcm9tZWRpbywgdG90YWxSYXRpbmdzLiBSb3V0aW5nIGtleTogUmF0aW5nQWN0dWFsaXphZG9FdmVudC5DUkVBVEUiICJFdmVudCBEVE8iICJFdmVudENvbXBvbmVudCIKICAgICAgICAgICAgICAgIG1lc3NhZ2VMaXN0ZW5lciA9IGNvbXBvbmVudCAiTWVzc2FnZUxpc3RlbmVyIiAiUGxhY2Vob2xkZXIgcGFyYSBjb25zdW1pciBldmVudG9zIChhY3R1YWxtZW50ZSBkZXNoYWJpbGl0YWRvKSIgIk1lc3NhZ2UgTGlzdGVuZXIiICJNZXNzYWdpbmdDb21wb25lbnQiCgogICAgICAgICAgICAgICAgcmFiYml0Q29uZmlnIC0+IHJhYmJpdG1xICJDb25maWd1cmEiCiAgICAgICAgICAgICAgICBtZXNzYWdlUHVibGlzaGVyIC0+IHJhdGluZ0FjdHVhbGl6YWRvRXZlbnQgIlB1YmxpY2EiCiAgICAgICAgICAgICAgICBtZXNzYWdlUHVibGlzaGVyIC0+IHJhYmJpdG1xICJFbnbDrWEgYSBleGNoYW5nZV92aWRlb2Nsb3VkMDAiCiAgICAgICAgICAgICAgICBtZXNzYWdlTGlzdGVuZXIgLT4gcmFiYml0bXEgIkVzY3VjaGEgKG5vIHVzYWRvIGFjdHVhbG1lbnRlKSIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgIyBSZWxhY2lvbmVzIGludGVybmFzIGRlbCBWZXJ0aWNhbAogICAgICAgICAgICBhcGlSZXN0IC0+IGFwcFNlcnZpY2UgIkRlbGVnYSBsw7NnaWNhIGRlIG5lZ29jaW8iCiAgICAgICAgICAgIGFwaVJlc3QgLT4gc2VjdXJpdHlDb25maWcgIlZhbGlkYSBKV1QgeSBhdXRvcml6YWNpw7NuIgogICAgICAgICAgICBhcHBTZXJ2aWNlIC0+IGRvbWFpbiAiQ3JlYSB5IG1hbmlwdWxhIGVudGlkYWRlcyBkZWwgZG9taW5pbyIKICAgICAgICAgICAgYXBwU2VydmljZSAtPiByZXBvc2l0b3J5ICJQZXJzaXN0ZSB5IGNvbnN1bHRhIGRhdG9zIgogICAgICAgICAgICBhcHBTZXJ2aWNlIC0+IG1lc3NhZ2luZ0NvbmZpZyAiUHVibGljYSBldmVudG9zIGRlIGNhbWJpb3MiCiAgICAgICAgICAgIHJlcG9zaXRvcnkgLT4gZGF0YWJhc2UgIkxlZS9Fc2NyaWJlIGRhdG9zIgogICAgICAgICAgICBkb21haW4gLT4gZHRvcyAiQ29udmllcnRlIGEvZGVzZGUgRFRPcyIKICAgICAgICAgICAgZHRvcyAtPiBhcGlSZXN0ICJTZXJpYWxpemEgcmVzcHVlc3RhcyIKCiAgICAgICAgICAgICMgUmVsYWNpb25lcyBhZGljaW9uYWxlcyBwYXJhIHZpc3RhcyBkaW7DoW1pY2FzCiAgICAgICAgICAgIGFwaVJlc3QgLT4gZnJvbnRlbmQgIlJldG9ybmEgcmVzcHVlc3RhcyBIVFRQIgogICAgICAgICAgICBhcHBTZXJ2aWNlIC0+IGFwcFNlcnZpY2UgIkNhbGN1bGEgZXN0YWTDrXN0aWNhcyIKICAgICAgICB9CgogICAgICAgICMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICAgICAgICMgUkVMQUNJT05FUyBFWFRFUk5BUyBERUwgVkVSVElDQUwKICAgICAgICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCiAgICAgICAgIyBVc3VhcmlvcyBleHRlcm5vcwogICAgICAgIHVzdWFyaW8gLT4gZnJvbnRlbmQgIkNvbnN1bHRhIGNhdMOhbG9nbyB5IGNhbGlmaWNhIHBlbMOtY3VsYXMiCiAgICAgICAgdXN1YXJpbyAtPiBhcGlHYXRld2F5ICJSZWFsaXphIHNvbGljaXR1ZGVzIGF1dGVudGljYWRhcyIKICAgICAgICBhZG1pbiAtPiBhcGlHYXRld2F5ICJHZXN0aW9uYSBwb2zDrXRpY2FzIGRlIHJhdGluZyIKCiAgICAgICAgIyBGbHVqbyBkZSBBdXRlbnRpY2FjacOzbiB5IEF1dG9yaXphY2nDs24KICAgICAgICBhcGlHYXRld2F5IC0+IGtleWNsb2FrICJWYWxpZGEgSldUIGNvbiBLZXljbG9hayIKICAgICAgICByYXRpbmdWZXJ0aWNhbC5zZWN1cml0eUNvbmZpZyAtPiBrZXljbG9hayAiT2J0aWVuZSBjbGF2ZSBww7pibGljYSBwYXJhIHZhbGlkYXIgSldUIgoKICAgICAgICAjIEZyb250ZW5kIGNvbnN1bWUgZWwgVmVydGljYWwgZGUgUmF0aW5nCiAgICAgICAgZnJvbnRlbmQgLT4gYXBpR2F0ZXdheSAiSFRUUCBSRVNUIGNvbiBKV1QgZW4gaGVhZGVycyIKICAgICAgICBhcGlHYXRld2F5IC0+IHJhdGluZ1ZlcnRpY2FsLmFwaVJlc3QgIkVucnV0YSBzb2xpY2l0dWRlcyBhIC9hcGkvcmF0aW5ncyIKCiAgICAgICAgIyBQdWJsaWNhY2nDs24gZGUgRXZlbnRvcyAoUmF0aW5nQWN0dWFsaXphZG9FdmVudCkKICAgICAgICByYXRpbmdWZXJ0aWNhbC5tZXNzYWdpbmdDb25maWcgLT4gcmFiYml0bXEgIlB1YmxpY2EgUmF0aW5nQWN0dWFsaXphZG9FdmVudCAoQ1JFQVRFLCBVUERBVEUpIgogICAgICAgIHJhYmJpdG1xIC0+IGNhdGFsb2dvU2VydmljZSAiQ29uc3VtZSBldmVudG9zIHBhcmEgYWN0dWFsaXphciBlc3RhZMOtc3RpY2FzIgoKICAgICAgICAjIFNpc3RlbWEgZGUgUGVsw61jdWxhcyAoQ29udGV4dG8pCiAgICAgICAgcmF0aW5nVmVydGljYWwgLT4gc2lzdGVtYVBlbGljdWxhcyAiT2J0aWVuZSBtZXRhZGF0b3MgZGUgcGVsw61jdWxhcyIKCgogICAgfQoKICAgIHZpZXdzIHsKCiAgICAgICAgIyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgICAgICAgIyBOSVZFTCAxOiBDT05URVhUTyBERUwgU0lTVEVNQQogICAgICAgICMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICAgICAgIHN5c3RlbUNvbnRleHQgcmF0aW5nVmVydGljYWwgewogICAgICAgICAgICB0aXRsZSAiQ29udGV4dG8gZGVsIFNpc3RlbWEgLSBSYXRpbmcgU2VydmljZSIKICAgICAgICAgICAgZGVzY3JpcHRpb24gIlZpc2nDs24gZ2VuZXJhbCBkZWwgdmVydGljYWwgZGUgUmF0aW5nIHkgc3VzIGludGVyYWNjaW9uZXMgZXh0ZXJuYXMgKEF1ZGllbmNpYTogU3Rha2Vob2xkZXJzLCBHZXJlbnRlcykiCgogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgYXV0b2xheW91dAogICAgICAgIH0KCiAgICAgICAgIyA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgICAgICAgIyBOSVZFTCAyOiBDT05URU5FRE9SRVMKICAgICAgICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICBjb250YWluZXIgcmF0aW5nVmVydGljYWwgewogICAgICAgICAgICB0aXRsZSAiQ29udGVuZWRvcmVzIGRlbCBWZXJ0aWNhbCBSYXRpbmciCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJFbGVtZW50b3MgZGVzcGxlZ2FibGVzIGRlbCBtaWNyb3NlcnZpY2lvOiBBUEksIFNlcnZpY2lvcywgQkQsIE1lc3NhZ2UgQnJva2VyIChBdWRpZW5jaWE6IERldk9wcywgU1JFcywgQXJxdWl0ZWN0b3MpIgoKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGF1dG9sYXlvdXQKICAgICAgICB9CgogICAgICAgICMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICAgICAgICMgTklWRUwgMzogQ09NUE9ORU5URVMKICAgICAgICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICBjb21wb25lbnQgcmF0aW5nVmVydGljYWwuYXBpUmVzdCB7CiAgICAgICAgICAgIHRpdGxlICJDb21wb25lbnRlcyAtIENhcGEgQVBJIFJFU1QiCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJEZXRhbGxlcyBpbnRlcm5vcyBkZWwgY29udGVuZWRvciBBUEkgUkVTVCAoQXVkaWVuY2lhOiBEZXNhcnJvbGxhZG9yZXMpIgogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgYXV0b2xheW91dAogICAgICAgIH0KCiAgICAgICAgY29tcG9uZW50IHJhdGluZ1ZlcnRpY2FsLmFwcFNlcnZpY2UgewogICAgICAgICAgICB0aXRsZSAiQ29tcG9uZW50ZXMgLSBDYXBhIGRlIFNlcnZpY2lvcyIKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkzDs2dpY2EgZGUgbmVnb2NpbyBwcmluY2lwYWwgZGVsIFJhdGluZyBTZXJ2aWNlIChBdWRpZW5jaWE6IERlc2Fycm9sbGFkb3JlcykiCiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvbGF5b3V0CiAgICAgICAgfQoKICAgICAgICBjb21wb25lbnQgcmF0aW5nVmVydGljYWwuZG9tYWluIHsKICAgICAgICAgICAgdGl0bGUgIkNvbXBvbmVudGVzIC0gTW9kZWxvIGRlIERvbWluaW8iCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJFbnRpZGFkZXMgZGVsIGRvbWluaW8gY29uIHJlZ2xhcyBkZSBuZWdvY2lvIGVtYmViaWRhcyAoQXVkaWVuY2lhOiBEZXNhcnJvbGxhZG9yZXMpIgogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgYXV0b2xheW91dAogICAgICAgIH0KCiAgICAgICAgY29tcG9uZW50IHJhdGluZ1ZlcnRpY2FsLnJlcG9zaXRvcnkgewogICAgICAgICAgICB0aXRsZSAiQ29tcG9uZW50ZXMgLSBDYXBhIGRlIFBlcnNpc3RlbmNpYSIKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkFjY2VzbyBhIGRhdG9zIHkgbWFwZWFkb3JlcyBKUEEgKEF1ZGllbmNpYTogRGVzYXJyb2xsYWRvcmVzKSIKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGF1dG9sYXlvdXQKICAgICAgICB9CgogICAgICAgIGNvbXBvbmVudCByYXRpbmdWZXJ0aWNhbC5zZWN1cml0eUNvbmZpZyB7CiAgICAgICAgICAgIHRpdGxlICJDb21wb25lbnRlcyAtIENhcGEgZGUgU2VndXJpZGFkIgogICAgICAgICAgICBkZXNjcmlwdGlvbiAiVmFsaWRhY2nDs24gZGUgSldUIHkgYXV0b3JpemFjacOzbiAoQXVkaWVuY2lhOiBEZXNhcnJvbGxhZG9yZXMpIgogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgYXV0b2xheW91dAogICAgICAgIH0KCiAgICAgICAgY29tcG9uZW50IHJhdGluZ1ZlcnRpY2FsLm1lc3NhZ2luZ0NvbmZpZyB7CiAgICAgICAgICAgIHRpdGxlICJDb21wb25lbnRlcyAtIENhcGEgZGUgTWVuc2FqZXLDrWEiCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJDb25maWd1cmFjacOzbiBkZSBSYWJiaXRNUSB5IHB1YmxpY2FjacOzbiBkZSBldmVudG9zIChBdWRpZW5jaWE6IERlc2Fycm9sbGFkb3JlcykiCiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvbGF5b3V0CiAgICAgICAgfQoKICAgICAgICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICAjIEZMVUpPUyBERSBORUdPQ0lPIERJTsOBTUlDT1MKICAgICAgICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICBkeW5hbWljIHJhdGluZ1ZlcnRpY2FsIHsKICAgICAgICAgICAgdGl0bGUgIkZsdWpvIGRlIE5lZ29jaW8gLSBDcmVhciBSYXRpbmciCiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTZWN1ZW5jaWEgZGUgcGFzb3MgY3VhbmRvIHVuIHVzdWFyaW8gY3JlYSB1biBudWV2byByYXRpbmciCgogICAgICAgICAgICB1c3VhcmlvIC0+IGZyb250ZW5kICIxLiBDb21wbGV0YSBmb3JtdWxhcmlvIGRlIHJhdGluZyIKICAgICAgICAgICAgZnJvbnRlbmQgLT4gYXBpR2F0ZXdheSAiMi4gUE9TVCAvYXBpL3JhdGluZ3MgY29uIEpXVCIKICAgICAgICAgICAgYXBpR2F0ZXdheSAtPiByYXRpbmdWZXJ0aWNhbC5hcGlSZXN0ICIzLiBFbnJ1dGEgc29saWNpdHVkIgogICAgICAgICAgICByYXRpbmdWZXJ0aWNhbC5hcGlSZXN0IC0+IHJhdGluZ1ZlcnRpY2FsLmFwcFNlcnZpY2UgIjQuIERlbGVnYSBsw7NnaWNhIGRlIG5lZ29jaW8iCiAgICAgICAgICAgIHJhdGluZ1ZlcnRpY2FsLmFwcFNlcnZpY2UgLT4gcmF0aW5nVmVydGljYWwuZG9tYWluICI1LiBDcmVhIGVudGlkYWQgUmF0aW5nIgogICAgICAgICAgICByYXRpbmdWZXJ0aWNhbC5hcHBTZXJ2aWNlIC0+IHJhdGluZ1ZlcnRpY2FsLnJlcG9zaXRvcnkgIjYuIFBlcnNpc3RlIGVuIEJEIgogICAgICAgICAgICByYXRpbmdWZXJ0aWNhbC5hcHBTZXJ2aWNlIC0+IHJhdGluZ1ZlcnRpY2FsLm1lc3NhZ2luZ0NvbmZpZyAiNy4gUHVibGljYSBldmVudG8iCiAgICAgICAgICAgIHJhdGluZ1ZlcnRpY2FsLm1lc3NhZ2luZ0NvbmZpZyAtPiByYWJiaXRtcSAiOC4gRW52w61hIFJhdGluZ0FjdHVhbGl6YWRvRXZlbnQiCiAgICAgICAgICAgIHJhYmJpdG1xIC0+IGNhdGFsb2dvU2VydmljZSAiOS4gQ29uc3VtZSBldmVudG8iCiAgICAgICAgICAgIHJhdGluZ1ZlcnRpY2FsLmFwaVJlc3QgLT4gZnJvbnRlbmQgIjEwLiBSZXRvcm5hIDIwMSBDUkVBVEVEIgogICAgICAgICAgICBmcm9udGVuZCAtPiB1c3VhcmlvICIxMS4gTXVlc3RyYSBjb25maXJtYWNpw7NuIgogICAgICAgIH0KCiAgICAgICAgZHluYW1pYyByYXRpbmdWZXJ0aWNhbCB7CiAgICAgICAgICAgIHRpdGxlICJGbHVqbyBkZSBOZWdvY2lvIC0gQ29uc3VsdGFyIFJhdGluZ3MgZGUgUGVsw61jdWxhIgogICAgICAgICAgICBkZXNjcmlwdGlvbiAiU2VjdWVuY2lhIGRlIHBhc29zIGN1YW5kbyBzZSBjb25zdWx0YW4gdG9kb3MgbG9zIHJhdGluZ3MgZGUgdW5hIHBlbMOtY3VsYSIKCiAgICAgICAgICAgIHVzdWFyaW8gLT4gZnJvbnRlbmQgIjEuIE5hdmVnYSBhIHDDoWdpbmEgZGUgcGVsw61jdWxhIgogICAgICAgICAgICBmcm9udGVuZCAtPiBhcGlHYXRld2F5ICIyLiBHRVQgL2FwaS9yYXRpbmdzL3BlbGljdWxhL3tpZH0iCiAgICAgICAgICAgIGFwaUdhdGV3YXkgLT4gcmF0aW5nVmVydGljYWwuYXBpUmVzdCAiMy4gRW5ydXRhIHNvbGljaXR1ZCIKICAgICAgICAgICAgcmF0aW5nVmVydGljYWwuYXBpUmVzdCAtPiByYXRpbmdWZXJ0aWNhbC5hcHBTZXJ2aWNlICI0LiBDb25zdWx0YSByYXRpbmdzIgogICAgICAgICAgICByYXRpbmdWZXJ0aWNhbC5hcHBTZXJ2aWNlIC0+IHJhdGluZ1ZlcnRpY2FsLnJlcG9zaXRvcnkgIjUuIFF1ZXJ5IGEgQkQiCiAgICAgICAgICAgIHJhdGluZ1ZlcnRpY2FsLnJlcG9zaXRvcnkgLT4gcmF0aW5nVmVydGljYWwuZGF0YWJhc2UgIjYuIFJlY3VwZXJhIHJlZ2lzdHJvcyIKICAgICAgICAgICAgcmF0aW5nVmVydGljYWwuYXBwU2VydmljZSAtPiByYXRpbmdWZXJ0aWNhbC5hcHBTZXJ2aWNlICI3LiBDYWxjdWxhIGVzdGFkw61zdGljYXMiCiAgICAgICAgICAgIHJhdGluZ1ZlcnRpY2FsLmFwaVJlc3QgLT4gZnJvbnRlbmQgIjguIFJldG9ybmEgbGlzdGEgZGUgcmF0aW5ncyIKICAgICAgICAgICAgZnJvbnRlbmQgLT4gdXN1YXJpbyAiOS4gUmVuZGVyaXphIHJhdGluZ3MgZW4gVUkiCiAgICAgICAgfQoKICAgICAgICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICAjIEVTVElMT1MgVklTVUFMRVMKICAgICAgICAjID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgICAgICBzdHlsZXMgewogICAgICAgICAgICAjIEVzdGlsb3MgcG9yIHRpcG8gZGUgZWxlbWVudG8KICAgICAgICAgICAgZWxlbWVudCAiVXN1YXJpbyIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMWU5MGZmCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAyNAogICAgICAgICAgICAgICAgaWNvbiBodHRwczovL3N0YXRpYy5zdHJ1Y3R1cml6ci5jb20vdGhlbWVzL2RlZmF1bHQvZWxlbWVudHMvcGVyc29uLnBuZwogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJBZG1pbmlzdHJhZG9yIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNmZjhjMDAKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDI0CiAgICAgICAgICAgICAgICBpY29uIGh0dHBzOi8vc3RhdGljLnN0cnVjdHVyaXpyLmNvbS90aGVtZXMvZGVmYXVsdC9lbGVtZW50cy9wZXJzb24ucG5nCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIkNsaWVudGUiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzM0OThkYgogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTgKICAgICAgICAgICAgICAgIGljb24gaHR0cHM6Ly9zdGF0aWMuc3RydWN0dXJpenIuY29tL3RoZW1lcy9kZWZhdWx0L2VsZW1lbnRzL3dlYkJyb3dzZXIucG5nCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIlNpc3RlbWFFeHRlcm5vIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICM5OTk5OTkKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE4CiAgICAgICAgICAgICAgICBzaGFwZSBCb3gKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiSW5mcmFlc3RydWN0dXJhIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMyYzNlNTAKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE4CiAgICAgICAgICAgICAgICBzaGFwZSBQaXBlCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIlJhdGluZ1NlcnZpY2UiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzZkYjMzZgogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMjQKICAgICAgICAgICAgICAgIGljb24gaHR0cHM6Ly9zdGF0aWMuc3RydWN0dXJpenIuY29tL3RoZW1lcy9kZWZhdWx0L2VsZW1lbnRzL2NvbXBvbmVudC5wbmcKICAgICAgICAgICAgfQoKICAgICAgICAgICAgIyBDb250ZW5lZG9yZXMKICAgICAgICAgICAgZWxlbWVudCAiQVBJQ29udGFpbmVyIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMzNDk4ZGIKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE2CiAgICAgICAgICAgICAgICBzaGFwZSBCb3gKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiU2VydmljZUNvbnRhaW5lciIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjOWI1OWI2CiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxNgogICAgICAgICAgICAgICAgc2hhcGUgQm94CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIkRvbWFpbkNvbnRhaW5lciIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjZTc0YzNjCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxNgogICAgICAgICAgICAgICAgc2hhcGUgQm94CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIlJlcG9zaXRvcnlDb250YWluZXIiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgI2U2N2UyMgogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTYKICAgICAgICAgICAgICAgIHNoYXBlIEJveAogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJEYXRhYmFzZUNvbnRhaW5lciIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjOTVhNWE2CiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxNgogICAgICAgICAgICAgICAgc2hhcGUgQ3lsaW5kZXIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiRFRPQ29udGFpbmVyIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICM5NWE1YTYKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDE2CiAgICAgICAgICAgICAgICBzaGFwZSBCb3gKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiU2VjdXJpdHlDb250YWluZXIiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzJlY2M3MQogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTYKICAgICAgICAgICAgICAgIHNoYXBlIEJveAogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJNZXNzYWdpbmdDb250YWluZXIiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgI2U3NGMzYwogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTYKICAgICAgICAgICAgICAgIHNoYXBlIFBpcGUKICAgICAgICAgICAgfQoKICAgICAgICAgICAgIyBDb21wb25lbnRlcwogICAgICAgICAgICBlbGVtZW50ICJDb250cm9sbGVyQ29tcG9uZW50IiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMzNDk4ZGIKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDEyCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIlNlcnZpY2VDb21wb25lbnQiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzliNTliNgogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiUmVwb3NpdG9yeUNvbXBvbmVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjZTY3ZTIyCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxMgogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJFbnRpdHlDb21wb25lbnQiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgI2U3NGMzYwogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiVmFsdWVPYmplY3RDb21wb25lbnQiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgI2MwMzkyYgogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiRFRPQ29tcG9uZW50IiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICM5NWE1YTYKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDEyCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIlNlY3VyaXR5Q29tcG9uZW50IiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMyZWNjNzEKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDEyCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIk1lc3NhZ2luZ0NvbXBvbmVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjZTc0YzNjCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxMgogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJNYXBwZXJDb21wb25lbnQiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzM0NDk1ZQogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgZm9udFNpemUgMTIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiRXhjZXB0aW9uQ29tcG9uZW50IiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNhOTMyMjYKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgICAgIGZvbnRTaXplIDEyCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgIkV4dGVybmFsU2VydmljZUNvbXBvbmVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjOTk5OTk5CiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxMgogICAgICAgICAgICB9CgogICAgICAgICAgICBlbGVtZW50ICJFdmVudENvbXBvbmVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjYzAzOTJiCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgICAgICBmb250U2l6ZSAxMgogICAgICAgICAgICB9CiAgICAgICAgfQoKICAgIH0KCgp9Cg=="
+  },
+  "views" : {
+    "componentViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "10",
+      "description" : "Detalles internos del contenedor API REST (Audiencia: Desarrolladores)",
+      "dimensions" : {
+        "height" : 2138,
+        "width" : 1680
+      },
+      "elements" : [ {
+        "id" : "11",
+        "x" : 615,
+        "y" : 182
+      }, {
+        "id" : "12",
+        "x" : 615,
+        "y" : 782
+      }, {
+        "id" : "13",
+        "x" : 240,
+        "y" : 1382
+      }, {
+        "id" : "14",
+        "x" : 990,
+        "y" : 1382
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Component-001",
+      "name" : "Component View: Rating Service - API REST Rating",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "15"
+      }, {
+        "id" : "16",
+        "vertices" : [ {
+          "x" : 465,
+          "y" : 782
+        } ]
+      }, {
+        "id" : "17",
+        "vertices" : [ {
+          "x" : 1215,
+          "y" : 782
+        } ]
+      }, {
+        "id" : "18"
+      }, {
+        "id" : "19"
+      } ],
+      "title" : "Componentes - Capa API REST"
+    }, {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "20",
+      "description" : "Lógica de negocio principal del Rating Service (Audiencia: Desarrolladores)",
+      "dimensions" : {
+        "height" : 1538,
+        "width" : 1680
+      },
+      "elements" : [ {
+        "id" : "21",
+        "x" : 615,
+        "y" : 183
+      }, {
+        "id" : "22",
+        "x" : 240,
+        "y" : 783
+      }, {
+        "id" : "23",
+        "x" : 990,
+        "y" : 783
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Component-002",
+      "name" : "Component View: Rating Service - Rating Service",
+      "order" : 4,
+      "relationships" : [ {
+        "id" : "24"
+      }, {
+        "id" : "25"
+      } ],
+      "title" : "Componentes - Capa de Servicios"
+    }, {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "26",
+      "description" : "Entidades del dominio con reglas de negocio embebidas (Audiencia: Desarrolladores)",
+      "dimensions" : {
+        "height" : 1538,
+        "width" : 3180
+      },
+      "elements" : [ {
+        "id" : "27",
+        "x" : 1364,
+        "y" : 182
+      }, {
+        "id" : "28",
+        "x" : 239,
+        "y" : 782
+      }, {
+        "id" : "29",
+        "x" : 989,
+        "y" : 782
+      }, {
+        "id" : "30",
+        "x" : 1739,
+        "y" : 782
+      }, {
+        "id" : "31",
+        "x" : 2489,
+        "y" : 782
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Component-003",
+      "name" : "Component View: Rating Service - Modelo de Dominio",
+      "order" : 5,
+      "relationships" : [ {
+        "id" : "32"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "35"
+      } ],
+      "title" : "Componentes - Modelo de Dominio"
+    }, {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "37",
+      "description" : "Acceso a datos y mapeadores JPA (Audiencia: Desarrolladores)",
+      "dimensions" : {
+        "height" : 938,
+        "width" : 930
+      },
+      "elements" : [ {
+        "id" : "38",
+        "x" : 240,
+        "y" : 183
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Component-004",
+      "name" : "Component View: Rating Service - Rating Repository",
+      "order" : 6,
+      "title" : "Componentes - Capa de Persistencia"
+    }, {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "40",
+      "description" : "Validación de JWT y autorización (Audiencia: Desarrolladores)",
+      "dimensions" : {
+        "height" : 1538,
+        "width" : 1652
+      },
+      "elements" : [ {
+        "id" : "4",
+        "x" : 1002,
+        "y" : 783
+      }, {
+        "id" : "41",
+        "x" : 240,
+        "y" : 183
+      }, {
+        "id" : "42",
+        "x" : 240,
+        "y" : 783
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Component-005",
+      "name" : "Component View: Rating Service - Configuración de Seguridad",
+      "order" : 7,
+      "relationships" : [ {
+        "id" : "43"
+      }, {
+        "id" : "44"
+      } ],
+      "title" : "Componentes - Capa de Seguridad"
+    }, {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "47",
+      "description" : "Configuración de RabbitMQ y publicación de eventos (Audiencia: Desarrolladores)",
+      "dimensions" : {
+        "height" : 1538,
+        "width" : 3152
+      },
+      "elements" : [ {
+        "id" : "7",
+        "x" : 2502,
+        "y" : 783
+      }, {
+        "id" : "48",
+        "x" : 1740,
+        "y" : 183
+      }, {
+        "id" : "49",
+        "x" : 240,
+        "y" : 183
+      }, {
+        "id" : "50",
+        "x" : 240,
+        "y" : 783
+      }, {
+        "id" : "51",
+        "x" : 990,
+        "y" : 183
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Component-006",
+      "name" : "Component View: Rating Service - RabbitMQ Config & Publisher",
+      "order" : 8,
+      "relationships" : [ {
+        "id" : "52"
+      }, {
+        "id" : "55"
+      }, {
+        "id" : "56",
+        "vertices" : [ {
+          "x" : 840,
+          "y" : 483
+        }, {
+          "x" : 2369,
+          "y" : 783
+        } ]
+      }, {
+        "id" : "57",
+        "vertices" : [ {
+          "x" : 1590,
+          "y" : 483
+        }, {
+          "x" : 2369,
+          "y" : 783
+        } ]
+      } ],
+      "title" : "Componentes - Capa de Mensajería"
+    } ],
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "SystemContext-001",
+      "metadataSymbols" : "SquareBrackets",
+      "styles" : {
+        "elements" : [ {
+          "background" : "#ff8c00",
+          "color" : "#ffffff",
+          "fontSize" : 24,
+          "icon" : "https://static.structurizr.com/themes/default/elements/person.png",
+          "tag" : "Administrador"
+        }, {
+          "background" : "#3498db",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Box",
+          "tag" : "APIContainer"
+        }, {
+          "background" : "#3498db",
+          "color" : "#ffffff",
+          "fontSize" : 18,
+          "icon" : "https://static.structurizr.com/themes/default/elements/webBrowser.png",
+          "tag" : "Cliente"
+        }, {
+          "background" : "#3498db",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "ControllerComponent"
+        }, {
+          "background" : "#95a5a6",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Cylinder",
+          "tag" : "DatabaseContainer"
+        }, {
+          "background" : "#e74c3c",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Box",
+          "tag" : "DomainContainer"
+        }, {
+          "background" : "#95a5a6",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "DTOComponent"
+        }, {
+          "background" : "#95a5a6",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Box",
+          "tag" : "DTOContainer"
+        }, {
+          "background" : "#e74c3c",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "EntityComponent"
+        }, {
+          "background" : "#c0392b",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "EventComponent"
+        }, {
+          "background" : "#a93226",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "ExceptionComponent"
+        }, {
+          "background" : "#999999",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "ExternalServiceComponent"
+        }, {
+          "background" : "#2c3e50",
+          "color" : "#ffffff",
+          "fontSize" : 18,
+          "shape" : "Pipe",
+          "tag" : "Infraestructura"
+        }, {
+          "background" : "#34495e",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "MapperComponent"
+        }, {
+          "background" : "#e74c3c",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "MessagingComponent"
+        }, {
+          "background" : "#e74c3c",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Pipe",
+          "tag" : "MessagingContainer"
+        }, {
+          "background" : "#6db33f",
+          "color" : "#ffffff",
+          "fontSize" : 24,
+          "icon" : "https://static.structurizr.com/themes/default/elements/component.png",
+          "tag" : "RatingService"
+        }, {
+          "background" : "#e67e22",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "RepositoryComponent"
+        }, {
+          "background" : "#e67e22",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Box",
+          "tag" : "RepositoryContainer"
+        }, {
+          "background" : "#2ecc71",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "SecurityComponent"
+        }, {
+          "background" : "#2ecc71",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Box",
+          "tag" : "SecurityContainer"
+        }, {
+          "background" : "#9b59b6",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "ServiceComponent"
+        }, {
+          "background" : "#9b59b6",
+          "color" : "#ffffff",
+          "fontSize" : 16,
+          "shape" : "Box",
+          "tag" : "ServiceContainer"
+        }, {
+          "background" : "#999999",
+          "color" : "#ffffff",
+          "fontSize" : 18,
+          "shape" : "Box",
+          "tag" : "SistemaExterno"
+        }, {
+          "background" : "#1e90ff",
+          "color" : "#ffffff",
+          "fontSize" : 24,
+          "icon" : "https://static.structurizr.com/themes/default/elements/person.png",
+          "tag" : "Usuario"
+        }, {
+          "background" : "#c0392b",
+          "color" : "#ffffff",
+          "fontSize" : 12,
+          "tag" : "ValueObjectComponent"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Elementos desplegables del microservicio: API, Servicios, BD, Message Broker (Audiencia: DevOps, SREs, Arquitectos)",
+      "dimensions" : {
+        "height" : 2619,
+        "width" : 3274
+      },
+      "elements" : [ {
+        "id" : "4",
+        "x" : 2623,
+        "y" : 1362
+      }, {
+        "id" : "5",
+        "x" : 2623,
+        "y" : 762
+      }, {
+        "id" : "6",
+        "x" : 2623,
+        "y" : 162
+      }, {
+        "id" : "7",
+        "x" : 2531,
+        "y" : 1962
+      }, {
+        "id" : "10",
+        "x" : 1873,
+        "y" : 162
+      }, {
+        "id" : "20",
+        "x" : 1048,
+        "y" : 762
+      }, {
+        "id" : "26",
+        "x" : 373,
+        "y" : 1362
+      }, {
+        "id" : "36",
+        "x" : 1123,
+        "y" : 1962
+      }, {
+        "id" : "37",
+        "x" : 1123,
+        "y" : 1362
+      }, {
+        "id" : "39",
+        "x" : 219,
+        "y" : 1962
+      }, {
+        "id" : "40",
+        "x" : 1873,
+        "y" : 762
+      }, {
+        "id" : "47",
+        "x" : 1873,
+        "y" : 1362
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Container-001",
+      "name" : "Container View: Rating Service",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "45",
+        "vertices" : [ {
+          "x" : 2379,
+          "y" : 1329
+        } ]
+      }, {
+        "id" : "53",
+        "vertices" : [ {
+          "x" : 2325,
+          "y" : 1922
+        } ]
+      }, {
+        "id" : "58"
+      }, {
+        "id" : "59"
+      }, {
+        "id" : "60"
+      }, {
+        "id" : "61"
+      }, {
+        "id" : "62"
+      }, {
+        "id" : "63"
+      }, {
+        "id" : "64"
+      }, {
+        "id" : "65",
+        "vertices" : [ {
+          "x" : 223,
+          "y" : 1662
+        }, {
+          "x" : 223,
+          "y" : 1362
+        }, {
+          "x" : 898,
+          "y" : 762
+        } ]
+      }, {
+        "id" : "66",
+        "vertices" : [ {
+          "x" : 2348,
+          "y" : 312
+        } ]
+      }, {
+        "id" : "68",
+        "vertices" : [ {
+          "x" : 1798,
+          "y" : 814
+        }, {
+          "x" : 1798,
+          "y" : 912
+        }, {
+          "x" : 1798,
+          "y" : 1000
+        } ]
+      }, {
+        "id" : "72"
+      }, {
+        "id" : "73",
+        "vertices" : [ {
+          "x" : 2566,
+          "y" : 1094
+        } ]
+      }, {
+        "id" : "74"
+      }, {
+        "id" : "75"
+      }, {
+        "id" : "77",
+        "vertices" : [ {
+          "x" : 2528,
+          "y" : 1701
+        } ]
+      } ],
+      "softwareSystemId" : "9",
+      "title" : "Contenedores del Vertical Rating"
+    } ],
+    "dynamicViews" : [ {
+      "description" : "Secuencia de pasos cuando un usuario crea un nuevo rating",
+      "dimensions" : {
+        "height" : 1748,
+        "width" : 2480
+      },
+      "elementId" : "9",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 35,
+        "y" : 20
+      }, {
+        "id" : "5",
+        "x" : 115,
+        "y" : 455
+      }, {
+        "id" : "6",
+        "x" : 1135,
+        "y" : 95
+      }, {
+        "id" : "7",
+        "x" : 1810,
+        "y" : 490
+      }, {
+        "id" : "8",
+        "x" : 1780,
+        "y" : 75
+      }, {
+        "id" : "10",
+        "x" : 450,
+        "y" : 850
+      }, {
+        "id" : "20",
+        "x" : 960,
+        "y" : 900
+      }, {
+        "id" : "26",
+        "x" : 485,
+        "y" : 1275
+      }, {
+        "id" : "37",
+        "x" : 950,
+        "y" : 1265
+      }, {
+        "id" : "47",
+        "x" : 1855,
+        "y" : 1095
+      } ],
+      "externalBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Dynamic-001",
+      "name" : "Dynamic View: Rating Service",
+      "order" : 9,
+      "paperSize" : "A5_Landscape",
+      "relationships" : [ {
+        "description" : "1. Completa formulario de rating",
+        "id" : "69",
+        "order" : "1",
+        "response" : false,
+        "vertices" : [ {
+          "x" : 225,
+          "y" : 300
+        } ]
+      }, {
+        "description" : "2. POST /api/ratings con JWT",
+        "id" : "74",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "3. Enruta solicitud",
+        "id" : "75",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "4. Delega lógica de negocio",
+        "id" : "58",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "5. Crea entidad Rating",
+        "id" : "60",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "6. Persiste en BD",
+        "id" : "61",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "7. Publica evento",
+        "id" : "62",
+        "order" : "7",
+        "response" : false
+      }, {
+        "description" : "8. Envía RatingActualizadoEvent",
+        "id" : "53",
+        "order" : "8",
+        "response" : false
+      }, {
+        "description" : "9. Consume evento",
+        "id" : "78",
+        "order" : "9",
+        "response" : false
+      }, {
+        "description" : "10. Retorna 201 CREATED",
+        "id" : "66",
+        "order" : "10",
+        "response" : false
+      }, {
+        "description" : "11. Muestra confirmación",
+        "id" : "69",
+        "order" : "11",
+        "response" : true,
+        "vertices" : [ {
+          "x" : 225,
+          "y" : 0
+        } ]
+      } ],
+      "title" : "Flujo de Negocio - Crear Rating"
+    }, {
+      "description" : "Secuencia de pasos cuando se consultan todos los ratings de una película",
+      "dimensions" : {
+        "height" : 1748,
+        "width" : 2480
+      },
+      "elementId" : "9",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "36",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "37",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Dynamic-002",
+      "name" : "Dynamic View: Rating Service",
+      "order" : 10,
+      "paperSize" : "A5_Landscape",
+      "relationships" : [ {
+        "description" : "1. Navega a página de película",
+        "id" : "69",
+        "order" : "1",
+        "response" : false,
+        "vertices" : [ {
+          "x" : 225,
+          "y" : 300
+        } ]
+      }, {
+        "description" : "2. GET /api/ratings/pelicula/{id}",
+        "id" : "74",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "3. Enruta solicitud",
+        "id" : "75",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "4. Consulta ratings",
+        "id" : "58",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "5. Query a BD",
+        "id" : "61",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "6. Recupera registros",
+        "id" : "63",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "7. Calcula estadísticas",
+        "id" : "68",
+        "order" : "7",
+        "response" : false
+      }, {
+        "description" : "8. Retorna lista de ratings",
+        "id" : "66",
+        "order" : "8",
+        "response" : false
+      }, {
+        "description" : "9. Renderiza ratings en UI",
+        "id" : "69",
+        "order" : "9",
+        "response" : true,
+        "vertices" : [ {
+          "x" : 225,
+          "y" : 0
+        } ]
+      } ],
+      "title" : "Flujo de Negocio - Consultar Ratings de Película"
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Visión general del vertical de Rating y sus interacciones externas (Audiencia: Stakeholders, Gerentes)",
+      "dimensions" : {
+        "height" : 2500,
+        "width" : 3209
+      },
+      "elements" : [ {
+        "id" : "3",
+        "x" : 449,
+        "y" : 742
+      }, {
+        "id" : "4",
+        "x" : 1537,
+        "y" : 1942
+      }, {
+        "id" : "5",
+        "x" : 1199,
+        "y" : 1342
+      }, {
+        "id" : "6",
+        "x" : 1199,
+        "y" : 742
+      }, {
+        "id" : "7",
+        "x" : 2558,
+        "y" : 742
+      }, {
+        "id" : "9",
+        "x" : 1199,
+        "y" : 142
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "generatedKey" : true,
+      "key" : "SystemContext-001",
+      "name" : "System Context View: Rating Service",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "46",
+        "vertices" : [ {
+          "x" : 1799,
+          "y" : 742
+        }, {
+          "x" : 1799,
+          "y" : 1642
+        } ]
+      }, {
+        "id" : "54"
+      }, {
+        "id" : "67"
+      }, {
+        "id" : "72"
+      }, {
+        "id" : "74"
+      }, {
+        "id" : "76",
+        "vertices" : [ {
+          "x" : 299,
+          "y" : 1042
+        }, {
+          "x" : 299,
+          "y" : 742
+        } ]
+      }, {
+        "id" : "79"
+      } ],
+      "softwareSystemId" : "9",
+      "title" : "Contexto del Sistema - Rating Service"
+    } ]
+  }
+}
