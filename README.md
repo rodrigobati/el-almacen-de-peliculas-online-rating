@@ -1,15 +1,44 @@
 # Rating Service - El Almacén de Películas Online
 
+## Documentacion corta de vertical
+
+### Proposito
+
+La vertical Rating registra calificaciones y comentarios de usuarios sobre peliculas. Calcula promedios por pelicula y publica el agregado para que Catalogo actualice la informacion visible en la ficha de cada pelicula.
+
+### Servicios HTTP que expone
+
+| Metodo | Endpoint interno | Proposito |
+| --- | --- | --- |
+| POST | `/api/ratings` | Crear rating para una pelicula. Requiere JWT salvo escenarios de test. |
+| GET | `/api/ratings/pelicula/{peliculaId}` | Listar ratings de una pelicula. |
+| GET | `/api/ratings/pelicula/{peliculaId}/promedio` | Obtener promedio de rating de una pelicula. |
+| GET | `/api/ratings/usuario/{usuarioId}` | Listar ratings de un usuario. |
+| GET | `/api/ratings/usuarios?ids={idsCsv}` | Resolver usernames desde Keycloak para una lista de ids. |
+| DELETE | `/api/ratings/{id}` | Placeholder de borrado; actualmente responde `204` sin eliminar. |
+
+Via API Gateway se consume como `/api/ratings/**`.
+
+### Eventos que publica
+
+| Exchange | Routing key / tipo | Proposito |
+| --- | --- | --- |
+| `exchange_videocloud00` | `RatingActualizadoEvent.CREATE` | Notificar a Catalogo el nuevo promedio y total de ratings de una pelicula. |
+
+### Eventos que consume
+
+No consume eventos actualmente. La clase `MessageListener` esta como placeholder para futuras integraciones.
+
 ## Descripción General
 
 **Rating Service** es un microservicio especializado en la gestión de ratings, puntajes y comentarios de películas en la plataforma "El Almacén de Películas Online". Forma parte de una arquitectura de microservicios escalable y es responsable de:
 
-- ⭐ Crear y almacenar ratings de películas por usuarios
-- 📝 Gestionar comentarios asociados a ratings
-- 📊 Calcular promedios y estadísticas agregadas
-- 🔐 Validar autenticación y autorización con OAuth2/Keycloak
-- 📨 Publicar eventos de cambios en ratings a través de RabbitMQ
-- 🔄 Integración asincrónica con otros microservicios (Catálogo, etc.)
+- Crear y almacenar ratings de películas por usuarios
+- Gestionar comentarios asociados a ratings
+- Calcular promedios y estadísticas agregadas
+- Validar autenticación y autorización con OAuth2/Keycloak
+- Publicar eventos de cambios en ratings a través de RabbitMQ
+- Integración asincrónica con otros microservicios (Catálogo, etc.)
 
 ## Características Técnicas
 
@@ -80,7 +109,7 @@ El proyecto incluye un modelo completo de arquitectura C4 (Context, Containers, 
 
 ## Flujos de Negocio Principales
 
-### 1️⃣ Crear Rating
+### 1️ Crear Rating
 ```
 Usuario → Frontend → API Gateway → RatingController → RatingService 
 → Rating (Dominio) → RatingRepository → MySQL
@@ -95,7 +124,7 @@ Usuario → Frontend → API Gateway → RatingController → RatingService
 
 **Respuesta**: HTTP 201 CREATED con datos del rating
 
-### 2️⃣ Consultar Ratings de Película
+### 2️ Consultar Ratings de Película
 ```
 Usuario → Frontend → API Gateway → RatingController 
 → RatingService → RatingRepository → MySQL
@@ -171,11 +200,11 @@ mvn test
 ```
 
 Características:
-- ✅ No usamos Mocks, Stubs ni Fakes (ejecución real en memoria)
-- ✅ Estructura clara: Setup → Ejercitación → Verificación
-- ✅ Nombres descriptivos: `cuestionATestear_resultadoEsperado`
-- ✅ Cobertura de casos límite (nulos, vacíos, inválidos)
-- ✅ Verificación de excepciones esperadas
+- No usamos Mocks, Stubs ni Fakes (ejecución real en memoria)
+- Estructura clara: Setup → Ejercitación → Verificación
+- Nombres descriptivos: `cuestionATestear_resultadoEsperado`
+- Cobertura de casos límite (nulos, vacíos, inválidos)
+- Verificación de excepciones esperadas
 
 Ejemplo:
 ```java
@@ -243,18 +272,6 @@ Response (200):
     "fechaCreacion": "2025-02-27T10:30:00"
   }
 ]
-```
-
-#### 3. Consultar Rating por ID
-```
-GET /api/ratings/{id}
-
-Response (200):
-{
-  "id": 123,
-  "peliculaId": 1,
-  ...
-}
 ```
 
 ## Seguridad
@@ -350,15 +367,9 @@ JetBrains IntelliJ IDEA:
 ## Contribución
 
 Las contribuciones deben seguir:
-1. ✅ Código limpio (Sin getters/setters innecesarios)
-2. ✅ Tests unitarios para cada cambio
-3. ✅ Documentación actualizada
-4. ✅ Commits descriptivos
-
-## Licencia
-
-Todos los derechos reservados - El Almacén de Películas Online
+1. Código limpio (Sin getters/setters innecesarios)
+2. Tests unitarios para cada cambio
+3. Documentación actualizada
+4. Commits descriptivos
 
 ---
-
-**Última actualización**: Febrero 2025 | **Versión**: 0.0.1-SNAPSHOT
