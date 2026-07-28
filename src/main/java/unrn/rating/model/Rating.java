@@ -20,6 +20,9 @@ public class Rating {
     @Embedded
     private Puntaje puntaje;
 
+    @Column
+    private String usuarioUsername;
+
     @Column(columnDefinition = "TEXT")
     private String comentario;
 
@@ -34,11 +37,17 @@ public class Rating {
         // sólo JPA
     }
 
+    @Deprecated
+    protected Rating() {
+        // Solo para JPA/Hibernate
+    }
+
     private Rating(Long peliculaId,
             String usuarioId,
             Puntaje puntaje,
             String comentario,
-            LocalDateTime fechaCreacion) {
+            LocalDateTime fechaCreacion,
+            String usuarioUsername) {
 
         if (peliculaId == null) {
             throw new RuntimeException(ERROR_PELICULA_OBLIGATORIA);
@@ -51,6 +60,7 @@ public class Rating {
         this.usuarioId = usuarioId;
         this.puntaje = puntaje;
         this.comentario = normalizarComentario(comentario);
+        this.usuarioUsername = usuarioUsername;
         this.fechaCreacion = fechaCreacion;
     }
 
@@ -58,11 +68,12 @@ public class Rating {
     public static Rating crear(Long peliculaId,
             String usuarioId,
             int valor,
-            String comentario) {
+            String comentario,
+            String usuarioUsername) {
 
         Puntaje puntaje = Puntaje.de(valor);
         LocalDateTime ahora = LocalDateTime.now();
-        return new Rating(peliculaId, usuarioId, puntaje, comentario, ahora);
+        return new Rating(peliculaId, usuarioId, puntaje, comentario, ahora, usuarioUsername);
     }
 
     // --- Comportamiento de dominio ---
@@ -96,6 +107,15 @@ public class Rating {
 
     public String usuarioId() {
         return usuarioId;
+    }
+
+    public String usuarioUsername() {
+        return usuarioUsername;
+    }
+
+    // Behavior method to update the cached username
+    public void actualizarUsuarioUsername(String usuarioUsername) {
+        this.usuarioUsername = usuarioUsername;
     }
 
     public int valor() {

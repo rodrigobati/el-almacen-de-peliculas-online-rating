@@ -16,4 +16,8 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     Double promedioPorPelicula(@Param("peliculaId") Long peliculaId);
 
     long countByPeliculaId(Long peliculaId);
+
+    boolean existsByPeliculaIdAndUsuarioId(Long peliculaId, String usuarioId);
+
+    java.util.List<unrn.rating.model.Rating> findByUsuarioUsernameIsNull();
 }

@@ -45,3 +45,5 @@ dependency-reduced-pom.xml
 docker-compose.override.yml
 *.local.ps1
 *.local.sh
+
+.structurizr/.structurizr

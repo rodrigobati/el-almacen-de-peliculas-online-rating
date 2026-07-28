@@ -50,6 +50,8 @@ public class SecurityConfiguration {
                                                 .requestMatchers("/actuator/health", "/actuator/health/**",
                                                                 "/actuator/info", "/actuator/info/**")
                                                 .permitAll()
+                                        .requestMatchers("/swagger-ui/", "/v3/api-docs/", "/swagger-ui.html").permitAll()
+                                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/ratings/**").permitAll()
                                                 // Keep other actuator endpoints secured by requiring authentication
                                                 .requestMatchers("/actuator/**", "/metrics/**").authenticated()
                                                 .anyRequest().authenticated())

@@ -6,6 +6,7 @@ public class RatingResponseDto {
     public Long id;
     public Long peliculaId;
     public String usuarioId;
+    public String usuarioUsername;
     public int valor;
     public String comentario;
     public LocalDateTime fechaCreacion;

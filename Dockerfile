@@ -1,11 +1,18 @@
+# syntax=docker/dockerfile:1.4
 # Etapa de build
 FROM maven:3.9.9-eclipse-temurin-21 AS build
+ARG CACHEBUST=1
 WORKDIR /app
 
 COPY pom.xml .
 
+# small cache-busting layer controlled by build-arg; keep it minimal so
+# other useful layers remain cacheable
+RUN echo "cachebust=$CACHEBUST" > /tmp/cachebust
+
 COPY src ./src
-RUN mvn -q -Dmaven.test.skip=true package
+# Use BuildKit cache mount for Maven local repository to speed up builds
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -Dmaven.test.skip=true package
 
 # Etapa de runtime
 FROM eclipse-temurin:21-jre

@@ -8,6 +8,8 @@ import unrn.rating.model.Rating;
 import unrn.rating.service.RatingService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @RestController
@@ -27,16 +29,50 @@ public class RatingController {
         // Extraer el userId del JWT (claim "sub" contiene el ID de usuario de Keycloak)
         // Para testing sin auth, usar un ID fijo si jwt es null
         String usuarioId = (jwt != null) ? jwt.getSubject() : "test-user-123";
-        Rating rating = RatingMapper.toModel(req, usuarioId);
-        Rating saved = service.createRating(rating);
-        return ResponseEntity.ok(RatingMapper.toDto(saved));
+        String usuarioUsername = null;
+        if (jwt != null) {
+            Object claim = jwt.getClaims().get("preferred_username");
+            if (claim != null) usuarioUsername = claim.toString();
+        }
+        Rating rating = RatingMapper.toModel(req, usuarioId, usuarioUsername);
+        try {
+            Rating saved = service.createRating(rating);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
+                    .body(RatingMapper.toDto(saved));
+        } catch (unrn.rating.service.DuplicateRatingException ex) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).build();
+        }
     }
 
     @GetMapping("/pelicula/{peliculaId}")
     public ResponseEntity<List<RatingResponseDto>> porPelicula(@PathVariable Long peliculaId) {
         var list = service.ratingsPorPelicula(peliculaId).stream().map(RatingMapper::toDto)
                 .collect(Collectors.toList());
+        // Enrich with usernames from Keycloak if available
+        try {
+            var ids = list.stream().map(r -> r.usuarioId).distinct().filter(id -> id != null).toList();
+            if (!ids.isEmpty()) {
+                var kc = new unrn.rating.service.KeycloakUserService();
+                var map = kc.findUsernamesByIds(ids);
+                list.forEach(r -> {
+                    if (r.usuarioId != null && map.containsKey(r.usuarioId))
+                        r.usuarioUsername = map.get(r.usuarioId);
+                });
+            }
+        } catch (Exception ignore) {
+            // best-effort
+        }
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/usuarios")
+    public ResponseEntity<Map<String, String>> nombresDeUsuarios(@RequestParam(name = "ids") String idsCsv) {
+        if (idsCsv == null || idsCsv.isBlank())
+            return ResponseEntity.ok(Collections.emptyMap());
+        var ids = List.of(idsCsv.split(","));
+        var kc = new unrn.rating.service.KeycloakUserService();
+        var map = kc.findUsernamesByIds(ids);
+        return ResponseEntity.ok(map);
     }
 
     @GetMapping("/pelicula/{peliculaId}/promedio")

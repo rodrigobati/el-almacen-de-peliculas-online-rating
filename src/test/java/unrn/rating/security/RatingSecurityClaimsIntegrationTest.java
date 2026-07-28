@@ -6,63 +6,58 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 import unrn.rating.api.RatingController;
 import unrn.rating.config.SecurityConfiguration;
+import unrn.rating.model.Rating;
 import unrn.rating.service.RatingService;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = RatingController.class)
-@Import(SecurityConfiguration.class)
+@Import({RatingController.class, SecurityConfiguration.class, RatingSecurityClaimsIntegrationTest.TestDoubles.class})
 class RatingSecurityClaimsIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private RatingService ratingService;
-
-    @MockBean
-    private JwtDecoder jwtDecoder;
+    @Test
+    @DisplayName("GET ratings por pelicula es publico")
+    void ratingEndpoint_sinAutenticacion_retorna200() throws Exception {
+        mockMvc.perform(get("/api/ratings/pelicula/1"))
+                .andExpect(status().isOk());
+    }
 
     @Test
-    @DisplayName("rating endpoint sin autenticacion retorna401")
-    void ratingEndpoint_sinAutenticacion_retorna401() throws Exception {
-        // Setup: Preparar el escenario
-
-        // Ejercitación: Ejecutar la acción a probar
-        mockMvc.perform(get("/api/ratings/pelicula/1"))
-                // Verificación: Verificar el resultado esperado
+    @DisplayName("POST rating sin autenticacion retorna401")
+    void crearRating_sinAutenticacion_retorna401() throws Exception {
+        mockMvc.perform(post("/api/ratings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"peliculaId\":1,\"valor\":5,\"comentario\":\"ok\"}"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("rating endpoint con claims jwt admin evita401")
-    void ratingEndpoint_conClaimsJwtAdmin_retorna404() throws Exception {
-        // Setup: Preparar el escenario
-        when(jwtDecoder.decode(anyString())).thenReturn(jwtConRealmRoleAdmin());
-        when(ratingService.ratingsPorPelicula(1L)).thenReturn(List.of());
-
-        // Ejercitación: Ejecutar la acción a probar
+    void ratingEndpoint_conClaimsJwtAdmin_retorna200() throws Exception {
         mockMvc.perform(get("/api/ratings/pelicula/1")
                 .header("Authorization", "Bearer token-admin"))
-                // Verificación: Verificar el resultado esperado
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 
-    private Jwt jwtConRealmRoleAdmin() {
+    private static Jwt jwtConRealmRoleAdmin() {
         return Jwt.withTokenValue("token")
                 .header("alg", "none")
                 .claim("sub", "user-1")
@@ -75,5 +70,38 @@ class RatingSecurityClaimsIntegrationTest {
     @SpringBootConfiguration
     @EnableAutoConfiguration
     static class TestApplication {
+    }
+
+    @TestConfiguration
+    static class TestDoubles {
+        @Bean
+        RatingService ratingService() {
+            return new RatingService(null, null) {
+                @Override
+                public Rating createRating(Rating rating) {
+                    return rating;
+                }
+
+                @Override
+                public List<Rating> ratingsPorPelicula(Long peliculaId) {
+                    return List.of();
+                }
+
+                @Override
+                public List<Rating> ratingsPorUsuario(String usuarioId) {
+                    return List.of();
+                }
+
+                @Override
+                public double promedioPorPelicula(Long peliculaId) {
+                    return 0.0;
+                }
+            };
+        }
+
+        @Bean
+        JwtDecoder jwtDecoder() {
+            return token -> jwtConRealmRoleAdmin();
+        }
     }
 }
